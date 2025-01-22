@@ -1,0 +1,97 @@
+// Copyright by liclem97.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Character.h"
+#include "InventoryCharacter.generated.h"
+
+class USpringArmComponent;
+class UCameraComponent;
+class UInputMappingContext;
+class UInputAction;
+struct FInputActionValue;
+class USphereComponent;
+
+UCLASS()
+class INVENTORYSYSTEM_API AInventoryCharacter : public ACharacter
+{
+	GENERATED_BODY()
+
+public:
+	AInventoryCharacter();
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+protected:
+	virtual void BeginPlay() override;
+
+	/** Player Input*/
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
+	void Interact();
+	/** end Player Input*/
+
+	UFUNCTION()
+	void OnInteractableDetectionOverlapBegin(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnInteractableDetectionOverlapEnd(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex);
+
+	UFUNCTION()
+	void OnMeshOverlapBegin(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnMeshOverlapEnd(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex);
+
+	UFUNCTION(Server, Reliable)
+	void ServerInteractWithInInteractable();
+
+private:
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	USpringArmComponent* CameraBoom;
+
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	UCameraComponent* FollowCamera;
+
+	UPROPERTY(EditAnywhere)
+	USphereComponent* InteractableDetectionSphere;
+
+	/** MappingContext */
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputMappingContext* DefaultMappingContext;
+
+	/** Input Actions */
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* JumpAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* MoveAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* LookAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* InteractAction;
+	/** end Input Actions */
+
+	float MouseSensitivity;
+
+	UPROPERTY()
+	AActor* InteractableActor;
+};
