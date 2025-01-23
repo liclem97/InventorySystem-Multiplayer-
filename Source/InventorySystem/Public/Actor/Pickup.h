@@ -5,31 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interface/InteractableInterface.h"
+#include "InventoryStructure.h"
 #include "Pickup.generated.h"
-
-USTRUCT(BlueprintType)
-struct FPickupItemInfo : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	FText PickupName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	UStaticMesh* PickupMesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	float PickupMesh_Scale;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	bool bShowPickupName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	FVector PickupMeshOffset;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	UTexture2D* HUD_Icon;
-};
 
 class UBoxComponent;
 class UWidgetComponent;
@@ -45,7 +22,7 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;	
 
 	/** Interactable Interface */
-	virtual void InteractWithActor_Implementation(ACharacter* PlayerCharacter) override;
+	virtual void InteractWithActor_Implementation(AInventoryCharacter* PlayerCharacter) override;
 	virtual void SetItemNameVisibility_Implementation(bool InVisibility) override;
 	/** end Interactable Interface*/
 
@@ -60,6 +37,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	UWidgetComponent* Widget_PickupName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"))
+	TArray<FInventoryContents> ItemContents;
 
 private:
 	UPROPERTY()

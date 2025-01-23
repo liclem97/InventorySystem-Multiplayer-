@@ -3,6 +3,7 @@
 
 #include "Actor/Pickup.h"
 
+#include "Character/InventoryCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -75,8 +76,9 @@ void APickup::OnConstruction(const FTransform& Transform)
 	}
 }
 
-void APickup::InteractWithActor_Implementation(ACharacter* PlayerCharacter)
-{
+void APickup::InteractWithActor_Implementation(AInventoryCharacter* PlayerCharacter)
+{	
+	PlayerCharacter->AddItemToInventory(ItemContents, this);
 	Destroy();
 }
 

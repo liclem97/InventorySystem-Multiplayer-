@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InventoryStructure.h"
 #include "InventoryCharacter.generated.h"
 
 class USpringArmComponent;
@@ -12,6 +13,7 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 class USphereComponent;
+class APickup;
 
 UCLASS()
 class INVENTORYSYSTEM_API AInventoryCharacter : public ACharacter
@@ -21,6 +23,9 @@ class INVENTORYSYSTEM_API AInventoryCharacter : public ACharacter
 public:
 	AInventoryCharacter();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void AddItemToInventory(TArray<FInventoryContents>& PickupContents, APickup* InPickup);
 
 protected:
 	virtual void BeginPlay() override;
@@ -61,6 +66,9 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerInteractWithInInteractable();
+
+	UPROPERTY(Replicated)
+	TArray<FInventoryContents> PlayerInventory;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)

@@ -6,6 +6,8 @@
 #include "UObject/Interface.h"
 #include "InteractableInterface.generated.h"
 
+class AInventoryCharacter;
+
 UINTERFACE(MinimalAPI)
 class UInteractableInterface : public UInterface
 {
@@ -21,7 +23,7 @@ class INVENTORYSYSTEM_API IInteractableInterface
 
 public:
 	UFUNCTION(BlueprintNativeEvent)
-	void InteractWithActor(ACharacter* PlayerCharacter);
+	void InteractWithActor(AInventoryCharacter* PlayerCharacter);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void SetItemNameVisibility(bool InVisibility);

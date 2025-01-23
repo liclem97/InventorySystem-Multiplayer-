@@ -15,6 +15,7 @@
 #include "Interface/InteractableInterface.h"
 #include "InventorySystem/InventorySystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 AInventoryCharacter::AInventoryCharacter()
 {
@@ -117,6 +118,53 @@ void AInventoryCharacter::OnMeshOverlapEnd(UPrimitiveComponent* OverlappedCompon
 	}
 }
 
+void AInventoryCharacter::AddItemToInventory(TArray<FInventoryContents>& PickupContents, APickup* InPickup)
+{	
+	FName ItemToAdd = "";
+	int32 AmountToAdd = 0;
+	bool bIsNewItem;
+	int32 ItemIndex = 0;
+	int32 CurrentAmountInInventory = 0;
+	int32 NewAmount = 0;
+	FString NewText = "";
+
+	for (const FInventoryContents& Pickups : PickupContents)
+	{
+		ItemToAdd = Pickups.ItemRowName;
+		AmountToAdd = Pickups.ItemAmount;
+		bIsNewItem = true;
+
+		for (int32 ArrayIndex = 0; ArrayIndex < PlayerInventory.Num(); ArrayIndex++)
+		{
+			if (PlayerInventory[ArrayIndex].ItemRowName == ItemToAdd)
+			{
+				bIsNewItem = false;
+				CurrentAmountInInventory = PlayerInventory[ArrayIndex].ItemAmount;
+				ItemIndex = ArrayIndex;
+				break;
+			}
+		}
+		if (bIsNewItem)
+		{
+			NewAmount = AmountToAdd;
+			FInventoryContents NewItem;
+			NewItem.ItemRowName = ItemToAdd;
+			NewItem.ItemAmount = NewAmount;
+			PlayerInventory.Add(NewItem);
+			NewText = FString::Printf(TEXT("Added NEW Item %s x %d"), *ItemToAdd.ToString(), NewAmount);
+		}
+		else
+		{
+			NewAmount = CurrentAmountInInventory + AmountToAdd;
+			PlayerInventory[ItemIndex].ItemRowName = ItemToAdd;
+			PlayerInventory[ItemIndex].ItemAmount = NewAmount;
+			NewText = FString::Printf(TEXT("Added Item %s x %d"), *ItemToAdd.ToString(), NewAmount);
+		}
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, NewText);
+	}
+	return;
+}
+
 void AInventoryCharacter::ServerInteractWithInInteractable_Implementation()
 {
 	if (IsValid(InteractableActor) && InteractableActor->Implements<UInteractableInterface>())
@@ -176,5 +224,12 @@ void AInventoryCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		UE_LOG(LogTemp, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 
+}
+
+void AInventoryCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AInventoryCharacter, PlayerInventory);
 }
 
