@@ -7,3 +7,8 @@ void UInventorySaveGame::SetPickupActorsInfo(TArray<FWorldInfo_PickupItem>& InAc
 {
 	All_PickupActorsInfo = InActorsInfo;
 }
+
+void UInventorySaveGame::SetIsFirstTimeLoadingMap(bool InFirstTimeLoadingMap)
+{
+	bIsFirstTimeLoadingMap = InFirstTimeLoadingMap;
+}

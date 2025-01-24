@@ -26,6 +26,16 @@ public:
 	virtual void SetItemNameVisibility_Implementation(bool InVisibility) override;
 	/** end Interactable Interface*/
 
+	/** Getter */
+	FORCEINLINE FName GetItemRowName() const { return ItemRowName; }
+	FORCEINLINE TArray<FInventoryContents> GetItemContents() const { return ItemContents; }
+	/** End Getter */
+
+	/** Setter */
+	void SetItemRowName(FName InItemRowName);
+	void SetItemContents(TArray<FInventoryContents>& InItemContents);
+	/** End Setter */
+
 protected:
 	virtual void BeginPlay() override;
 

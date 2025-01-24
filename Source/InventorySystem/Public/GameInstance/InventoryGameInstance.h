@@ -18,9 +18,16 @@ class INVENTORYSYSTEM_API UInventoryGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 	
-protected:
+public:
 	UInventorySaveGame* Initialize_GameWorldSave(FString SaveSlotName);
-	void Update_SavedPickupActors(TArray<FWorldInfo_PickupItem> All_PickupActorsInfo);
+	void Update_SavedPickupActors(TArray<FWorldInfo_PickupItem>& All_PickupActorsInfo);
+
+	/** Getter */
+	FORCEINLINE UInventorySaveGame* GetSaveGameWorld() const { return SaveGameWorld; }
+	FORCEINLINE FString GetGameWorldSaveSlot() const { return GameWorldSaveSlot; }
+	/** End Getter*/
+
+protected:
 
 private:
 	FString GameWorldSaveSlot;

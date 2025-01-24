@@ -90,6 +90,16 @@ void APickup::SetItemNameVisibility_Implementation(bool InVisibility)
 	}
 }
 
+void APickup::SetItemRowName(FName InItemRowName)
+{
+	ItemRowName = InItemRowName;
+}
+
+void APickup::SetItemContents(TArray<FInventoryContents>& InItemContents)
+{
+	ItemContents = InItemContents;
+}
+
 void APickup::BeginPlay()
 {
 	Super::BeginPlay();
