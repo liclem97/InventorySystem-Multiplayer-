@@ -38,3 +38,18 @@ struct FInventoryContents : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 ItemAmount;
 };
+
+USTRUCT(BlueprintType)
+struct FWorldInfo_PickupItem : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	FName ItemRowName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	TArray<FInventoryContents> ItemContents;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	FTransform WorldTransform;
+};
