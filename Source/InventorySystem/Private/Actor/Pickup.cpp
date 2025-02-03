@@ -100,6 +100,11 @@ void APickup::SetItemContents(TArray<FInventoryContents>& InItemContents)
 	ItemContents = InItemContents;
 }
 
+void APickup::SetItemDataTable(UDataTable* InItemDataTable)
+{
+	ItemDataTable = InItemDataTable;
+}
+
 void APickup::BeginPlay()
 {
 	Super::BeginPlay();

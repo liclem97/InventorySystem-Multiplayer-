@@ -34,7 +34,7 @@ UInventorySaveGame* UInventoryGameInstance::Initialize_GameWorldSave(FString Sav
 void UInventoryGameInstance::Update_SavedPickupActors(TArray<FWorldInfo_PickupItem>& All_PickupActorsInfo)
 {
 	if (!IsValid(SaveGameWorld)) return;
-
+	
 	SaveGameWorld->SetPickupActorsInfo(All_PickupActorsInfo);
 	UGameplayStatics::SaveGameToSlot(SaveGameWorld, GameWorldSaveSlot, 0);
 	return;

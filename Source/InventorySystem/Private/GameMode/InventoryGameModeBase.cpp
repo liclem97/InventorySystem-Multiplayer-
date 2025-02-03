@@ -35,19 +35,20 @@ void AInventoryGameModeBase::Setup_PickupActors(const TArray<FWorldInfo_PickupIt
 		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString("No Saved PICKUP data, saving world info to SaveGame"));
 		TArray<AActor*> OutActors;
 		UGameplayStatics::GetAllActorsOfClass(this, APickup::StaticClass(), OutActors);
-		for (AActor* Actor : OutActors)
+		for (AActor* InActor : OutActors)
 		{
-			All_SavedPickupActors.Add(static_cast<APickup*>(Actor));
+			All_SavedPickupActors.Add(Cast<APickup>(InActor));
 		}
 
+		All_SavedPickupActorsInfo.SetNum(All_SavedPickupActors.Num());
 		for (int32 ArrayIndex = 0; ArrayIndex < All_SavedPickupActors.Num(); ArrayIndex++)
 		{	
-			FWorldInfo_PickupItem Item;
-			Item.ItemRowName = All_SavedPickupActors[ArrayIndex]->GetItemRowName();
-			Item.ItemContents = All_SavedPickupActors[ArrayIndex]->GetItemContents();
-			Item.WorldTransform = All_SavedPickupActors[ArrayIndex]->GetActorTransform();
-
-			All_SavedPickupActorsInfo[ArrayIndex] = Item;
+			if (All_SavedPickupActors[ArrayIndex])
+			{
+				All_SavedPickupActorsInfo[ArrayIndex].ItemRowName = All_SavedPickupActors[ArrayIndex]->GetItemRowName();
+				All_SavedPickupActorsInfo[ArrayIndex].ItemContents = All_SavedPickupActors[ArrayIndex]->GetItemContents();
+				All_SavedPickupActorsInfo[ArrayIndex].WorldTransform = All_SavedPickupActors[ArrayIndex]->GetActorTransform();
+			}			
 		}
 		InventoryGameInstance->Update_SavedPickupActors(All_SavedPickupActorsInfo);
 		return;
@@ -57,9 +58,9 @@ void AInventoryGameModeBase::Setup_PickupActors(const TArray<FWorldInfo_PickupIt
 		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, FString("Saved PICKUP data found, loading world contents"));
 		TArray<AActor*> OutActors;
 		UGameplayStatics::GetAllActorsOfClass(this, APickup::StaticClass(), OutActors);
-		for (AActor* Actor : OutActors)
+		for (AActor* InActor : OutActors)
 		{
-			Actor->Destroy();
+			InActor->Destroy();
 		}		
 
 		FTransform SpawnTransform;
@@ -69,16 +70,16 @@ void AInventoryGameModeBase::Setup_PickupActors(const TArray<FWorldInfo_PickupIt
 		{
 			SpawnTransform = PickupItem.WorldTransform;
 			SpawnedPickup = Cast<APickup>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, APickup::StaticClass(), SpawnTransform));
-
 			if (SpawnedPickup)
 			{
+				SpawnedPickup->SetItemDataTable(ItemDataTable);
 				SpawnedPickup->SetItemRowName(PickupItem.ItemRowName);
 				SpawnedPickup->SetItemContents(PickupItem.ItemContents);
 
 				UGameplayStatics::FinishSpawningActor(SpawnedPickup, SpawnTransform);
-
-				int32 Index = All_SavedPickupActors.Add(SpawnedPickup);
-				All_SavedPickupActorsInfo[Index] = PickupItem;
+				
+				All_SavedPickupActors.Add(SpawnedPickup);
+				All_SavedPickupActorsInfo.Add(PickupItem);		
 			}
 		}
 		return;

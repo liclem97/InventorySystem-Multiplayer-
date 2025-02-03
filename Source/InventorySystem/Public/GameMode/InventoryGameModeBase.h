@@ -38,4 +38,7 @@ private:
 
 	UPROPERTY()
 	TArray<FWorldInfo_PickupItem> All_SavedPickupActorsInfo;
+
+	UPROPERTY(EditDefaultsOnly, Category = "DataTable")
+	UDataTable* ItemDataTable;
 };

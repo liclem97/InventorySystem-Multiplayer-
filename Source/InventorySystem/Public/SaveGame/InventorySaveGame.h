@@ -27,7 +27,9 @@ public:
 	/** End Getter */
 
 private:
+	UPROPERTY(VisibleAnywhere)
 	TArray<FWorldInfo_PickupItem> All_PickupActorsInfo;
 
+	UPROPERTY(VisibleAnywhere)
 	bool bIsFirstTimeLoadingMap = true;
 };
