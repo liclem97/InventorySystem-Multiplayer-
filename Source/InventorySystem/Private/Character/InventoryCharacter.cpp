@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameMode/InventoryGameModeBase.h"
 #include "InputActionValue.h"
 #include "Interface/InteractableInterface.h"
 #include "InventorySystem/InventorySystem.h"
@@ -162,6 +163,7 @@ void AInventoryCharacter::AddItemToInventory(TArray<FInventoryContents>& PickupC
 		}
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, NewText);
 	}
+	InventoryGameMode->Remove_SavedPickupActor(InPickup);
 	return;
 }
 
@@ -231,5 +233,10 @@ void AInventoryCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AInventoryCharacter, PlayerInventory);
+}
+
+void AInventoryCharacter::PossessedBy(AController* NewController)
+{
+	InventoryGameMode = InventoryGameMode == nullptr ? Cast<AInventoryGameModeBase>(UGameplayStatics::GetGameMode(this)) : InventoryGameMode;
 }
 

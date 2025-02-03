@@ -14,6 +14,7 @@ class UInputAction;
 struct FInputActionValue;
 class USphereComponent;
 class APickup;
+class AInventoryGameModeBase;
 
 UCLASS()
 class INVENTORYSYSTEM_API AInventoryCharacter : public ACharacter
@@ -24,6 +25,7 @@ public:
 	AInventoryCharacter();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void PossessedBy(AController* NewController) override;
 
 	void AddItemToInventory(TArray<FInventoryContents>& PickupContents, APickup* InPickup);
 
@@ -102,4 +104,7 @@ private:
 
 	UPROPERTY()
 	AActor* InteractableActor;
+
+	UPROPERTY()
+	AInventoryGameModeBase* InventoryGameMode;
 };

@@ -84,3 +84,44 @@ void AInventoryGameModeBase::Setup_PickupActors(const TArray<FWorldInfo_PickupIt
 		return;
 	}
 }
+
+void AInventoryGameModeBase::Add_SavedPickupActor(APickup* InPickup)
+{	
+	int32 NewIndex = All_SavedPickupActors.AddUnique(InPickup);
+	if (NewIndex >= 0 && InventoryGameInstance)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 6.f, FColor::Green, FString("PICKUP ADDED TO SAVEGAME."));
+
+		All_SavedPickupActorsInfo[NewIndex].ItemRowName = InPickup->GetItemRowName();
+		All_SavedPickupActorsInfo[NewIndex].ItemContents = InPickup->GetItemContents();
+		All_SavedPickupActorsInfo[NewIndex].WorldTransform = InPickup->GetActorTransform();
+
+		InventoryGameInstance->Update_SavedPickupActors(All_SavedPickupActorsInfo);
+		return;
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 6.f, FColor::Red, FString("ADDING PICKUP TO SAVEGAME FAILED."));
+		return;
+	}
+}
+
+void AInventoryGameModeBase::Remove_SavedPickupActor(APickup* InPickup)
+{
+	int32 IndexToRemove = All_SavedPickupActors.Find(InPickup);
+	if (IndexToRemove >= 0 && InventoryGameInstance)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 6.f, FColor::Green, FString("PICKUP REMOVED FROM SAVEGAME."));
+
+		All_SavedPickupActorsInfo.RemoveAt(IndexToRemove);
+		All_SavedPickupActors.RemoveAt(IndexToRemove);
+
+		InventoryGameInstance->Update_SavedPickupActors(All_SavedPickupActorsInfo);
+		return;
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 6.f, FColor::Red, FString("PICKUP REMOVE FROM SAVEGAME FAILED."));
+		return;
+	}
+}

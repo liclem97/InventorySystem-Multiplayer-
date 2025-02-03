@@ -18,10 +18,13 @@ UCLASS()
 class INVENTORYSYSTEM_API AInventoryGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+public:
+	void Remove_SavedPickupActor(APickup* InPickup);
 
 protected:
 	virtual void BeginPlay() override;
 	void Setup_PickupActors(const TArray<FWorldInfo_PickupItem>& All_PickupActorsInfo, bool bIsFirstTimeLoadingMap);
+	void Add_SavedPickupActor(APickup* InPickup);
 
 private:
 	UPROPERTY()
