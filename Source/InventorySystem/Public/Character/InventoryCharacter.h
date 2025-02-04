@@ -15,6 +15,7 @@ struct FInputActionValue;
 class USphereComponent;
 class APickup;
 class AInventoryGameModeBase;
+class AInventoryPlayerController;
 
 UCLASS()
 class INVENTORYSYSTEM_API AInventoryCharacter : public ACharacter
@@ -31,6 +32,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	void SetupInputMapping();
 
 	/** Player Input*/
 	void Move(const FInputActionValue& Value);
@@ -109,4 +111,7 @@ private:
 
 	UPROPERTY()
 	AInventoryGameModeBase* InventoryGameMode;
+
+	UPROPERTY()
+	AInventoryPlayerController* InventoryPlayerController;
 };
