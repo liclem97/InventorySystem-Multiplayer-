@@ -3,6 +3,7 @@
 
 #include "Character/InventoryCharacter.h"
 
+#include "Actor/Pickup.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
@@ -16,6 +17,7 @@
 #include "Interface/InteractableInterface.h"
 #include "InventorySystem/InventorySystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 AInventoryCharacter::AInventoryCharacter()
@@ -119,6 +121,88 @@ void AInventoryCharacter::OnMeshOverlapEnd(UPrimitiveComponent* OverlappedCompon
 	}
 }
 
+void AInventoryCharacter::RemoveItemFromInventory(TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld)
+{
+		if (PlayerInventory.IsEmpty())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Inventory is empty. Cannot remove items."));
+			return;
+		}
+
+		FVector DropLocation = GetActorLocation();
+
+		if (bDropIntoWorld)
+		{
+			FVector Start = GetActorLocation();
+			FVector End = Start + (GetActorUpVector() * -500.f);
+			FHitResult HitResult;
+
+			bool bHit = UKismetSystemLibrary::LineTraceSingle(
+				this,
+				Start,
+				End,
+				UEngineTypes::ConvertToTraceType(ECC_Visibility),
+				false,
+				TArray<AActor*>(),
+				EDrawDebugTrace::ForDuration,
+				HitResult,
+				true
+			);
+
+			if (bHit)
+			{
+				DropLocation = HitResult.Location;
+			}
+
+			FTransform SpawnTransform(FRotator(0.f, GetActorRotation().Yaw, 0.f), DropLocation);
+
+			APickup* SpawnedPickup = Cast<APickup>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, APickup::StaticClass(), SpawnTransform));
+			if (SpawnedPickup)
+			{
+				SpawnedPickup->SetItemDataTable(InventoryGameMode->GetItemDataTable());
+				SpawnedPickup->SetItemRowName(ItemInfo[0].ItemRowName);
+				SpawnedPickup->SetItemContents(ItemInfo);
+
+				UGameplayStatics::FinishSpawningActor(SpawnedPickup, SpawnTransform);
+
+				if (InventoryGameMode)
+				{
+					InventoryGameMode->Add_SavedPickupActor(SpawnedPickup);
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString("Pickup added to saved actors."));
+				}
+			}
+		}
+
+		for (const FInventoryContents& InItemInfo : ItemInfo)
+		{
+			int32 ItemIndex = PlayerInventory.IndexOfByPredicate([&](const FInventoryContents& Item) {
+				return Item.ItemRowName == InItemInfo.ItemRowName;
+				});
+
+			if (ItemIndex != INDEX_NONE)
+			{
+				int32 CurrentAmount = PlayerInventory[ItemIndex].ItemAmount;
+				int32 NewAmount = FMath::Max(0, CurrentAmount - InItemInfo.ItemAmount);
+
+				if (NewAmount > 0)
+				{
+					PlayerInventory[ItemIndex].ItemAmount = NewAmount;
+				}
+				else
+				{
+					PlayerInventory.RemoveAtSwap(ItemIndex, 1, false);
+				}
+
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Removed %d of %s. New amount: %d"),
+					InItemInfo.ItemAmount, *InItemInfo.ItemRowName.ToString(), NewAmount));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Item %s not found in inventory."), *InItemInfo.ItemRowName.ToString());
+			}
+		}
+}
+
 void AInventoryCharacter::AddItemToInventory(TArray<FInventoryContents>& PickupContents, APickup* InPickup)
 {	
 	FName ItemToAdd = "";
@@ -173,6 +257,20 @@ void AInventoryCharacter::ServerInteractWithInInteractable_Implementation()
 	{
 		IInteractableInterface::Execute_InteractWithActor(InteractableActor, this);
 	}
+	else
+	{	
+		if (PlayerInventory.Num() > 0)
+		{
+			TArray<FInventoryContents> DropItemArray;
+			FInventoryContents DropItem;
+			DropItem.ItemRowName = PlayerInventory[0].ItemRowName;
+			DropItem.ItemAmount = 1;
+
+			DropItemArray.Add(DropItem);
+
+			RemoveItemFromInventory(DropItemArray, true);
+		}
+	}
 }
 
 void AInventoryCharacter::Move(const FInputActionValue& Value)
@@ -219,7 +317,7 @@ void AInventoryCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AInventoryCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AInventoryCharacter::Look);		
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AInventoryCharacter::Interact);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AInventoryCharacter::Interact);
 	}
 	else
 	{
@@ -238,5 +336,7 @@ void AInventoryCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 void AInventoryCharacter::PossessedBy(AController* NewController)
 {
 	InventoryGameMode = InventoryGameMode == nullptr ? Cast<AInventoryGameModeBase>(UGameplayStatics::GetGameMode(this)) : InventoryGameMode;
+
+
 }
 

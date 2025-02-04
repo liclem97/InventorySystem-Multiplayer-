@@ -88,22 +88,31 @@ void AInventoryGameModeBase::Setup_PickupActors(const TArray<FWorldInfo_PickupIt
 
 void AInventoryGameModeBase::Add_SavedPickupActor(APickup* InPickup)
 {	
+	if (!InPickup)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 6.f, FColor::Red, FString("Invalid Pickup"));
+		return;
+	}
 	int32 NewIndex = All_SavedPickupActors.AddUnique(InPickup);
-	if (NewIndex >= 0 && InventoryGameInstance)
+	if (NewIndex != INDEX_NONE && InventoryGameInstance)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 6.f, FColor::Green, FString("PICKUP ADDED TO SAVEGAME."));
+
+		// Ensure All_SavedPickupActorsInfo has enough space
+		if (All_SavedPickupActorsInfo.Num() <= NewIndex)
+		{
+			All_SavedPickupActorsInfo.SetNum(NewIndex + 1);
+		}
 
 		All_SavedPickupActorsInfo[NewIndex].ItemRowName = InPickup->GetItemRowName();
 		All_SavedPickupActorsInfo[NewIndex].ItemContents = InPickup->GetItemContents();
 		All_SavedPickupActorsInfo[NewIndex].WorldTransform = InPickup->GetActorTransform();
 
 		InventoryGameInstance->Update_SavedPickupActors(All_SavedPickupActorsInfo);
-		return;
 	}
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 6.f, FColor::Red, FString("ADDING PICKUP TO SAVEGAME FAILED."));
-		return;
 	}
 }
 

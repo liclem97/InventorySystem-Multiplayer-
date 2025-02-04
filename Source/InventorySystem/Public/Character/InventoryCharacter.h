@@ -72,6 +72,8 @@ protected:
 	UPROPERTY(Replicated)
 	TArray<FInventoryContents> PlayerInventory;
 
+	void RemoveItemFromInventory(TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld);
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
