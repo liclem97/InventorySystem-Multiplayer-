@@ -4,6 +4,6 @@
 #include "SaveGame/PlayerInventorySaveGame.h"
 
 void UPlayerInventorySaveGame::SetPlayerInventory(const TArray<FInventoryContents>& InPlayerInventory)
-{
+{	
 	PlayerInventory = InPlayerInventory;
 }

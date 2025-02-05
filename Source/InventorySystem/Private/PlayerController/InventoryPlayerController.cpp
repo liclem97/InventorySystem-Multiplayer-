@@ -18,6 +18,8 @@ void AInventoryPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InventoryCharacter = InventoryCharacter == nullptr ? Cast<AInventoryCharacter>(GetPawn()) : InventoryCharacter;
+
 	if (IsLocalPlayerController() && HasAuthority())
 	{
 		Inventory_SlotName = "InventorySlot_00";
@@ -33,20 +35,29 @@ void AInventoryPlayerController::LoadInventorySaveGame()
 		PlayerInventorySaveGame = Cast<UPlayerInventorySaveGame>(UGameplayStatics::LoadGameFromSlot(Inventory_SlotName, 0));
 	}
 	else
-	{
-		PlayerInventorySaveGame = Cast<UPlayerInventorySaveGame>(UGameplayStatics::CreateSaveGameObject(UPlayerInventorySaveGame::StaticClass()));
-		UGameplayStatics::SaveGameToSlot(PlayerInventorySaveGame, Inventory_SlotName, 0);
+	{	
+		if (PlayerInventorySaveGameClass)
+		{
+			PlayerInventorySaveGame = Cast<UPlayerInventorySaveGame>(UGameplayStatics::CreateSaveGameObject(PlayerInventorySaveGameClass));
+			UGameplayStatics::SaveGameToSlot(PlayerInventorySaveGame, Inventory_SlotName, 0);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PlayerController: Please Set PlayerInventory Savegame Class."));
+		}		
 	}
 }
 
 void AInventoryPlayerController::SaveInventoryToSaveGame_Implementation(const TArray<FInventoryContents>& InPlayerInventory)
 {
-	if (PlayerInventorySaveGame == nullptr)
+	if (PlayerInventorySaveGame)
+	{	
+		PlayerInventorySaveGame->SetPlayerInventory(InPlayerInventory);
+		UGameplayStatics::SaveGameToSlot(PlayerInventorySaveGame, Inventory_SlotName, 0);
+	}
+	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("InventoryPlayerController: (SaveInventoryToSaveGame) PlayerInventorySaveGame is nullptr."));
+		UE_LOG(LogTemp, Error, TEXT("InventoryPlayerController: (SaveInventoryToSaveGame) PlayerInventorySaveGame is not valid."));
 		return;
 	}
-
-	PlayerInventorySaveGame->SetPlayerInventory(InPlayerInventory);
-	UGameplayStatics::SaveGameToSlot(PlayerInventorySaveGame, Inventory_SlotName, 0);
 }

@@ -9,6 +9,7 @@
 
 class AInventoryCharacter;
 class UPlayerInventorySaveGame;
+class USaveGame;
 
 /**
  * 
@@ -26,15 +27,19 @@ protected:
 	virtual void OnPossess(APawn* aPawn) override;
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable)
 	void LoadInventorySaveGame();	
 
 private:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	AInventoryCharacter* InventoryCharacter;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FString Inventory_SlotName;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<USaveGame> PlayerInventorySaveGameClass;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	UPlayerInventorySaveGame* PlayerInventorySaveGame;
 };

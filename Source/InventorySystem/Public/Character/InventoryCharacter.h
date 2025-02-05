@@ -31,7 +31,7 @@ public:
 	void AddItemToInventory(TArray<FInventoryContents>& PickupContents, APickup* InPickup);
 
 	/** Server */
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_LoadInventoryFromSaveGame(const TArray<FInventoryContents>& InPlayerInventory);
 	/** End Server */
 

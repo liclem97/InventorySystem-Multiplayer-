@@ -21,10 +21,12 @@ public:
 	/** End Setter */
 
 	/** Getter */
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE TArray<FInventoryContents> GetPlayerInventory() const { return PlayerInventory; }
 	/** End Getter */
 
 private:
+	UPROPERTY()
 	TArray<FInventoryContents> PlayerInventory;
 
 };
