@@ -4,7 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "InventoryStructure.h"
 #include "InventoryPlayerController.generated.h"
+
+class AInventoryCharacter;
+class UPlayerInventorySaveGame;
 
 /**
  * 
@@ -13,5 +17,24 @@ UCLASS()
 class INVENTORYSYSTEM_API AInventoryPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+
+public:
+	UFUNCTION(Client, Reliable)
+	void SaveInventoryToSaveGame(const TArray<FInventoryContents>& InPlayerInventory);
 	
+protected:
+	virtual void OnPossess(APawn* aPawn) override;
+	virtual void BeginPlay() override;
+
+	void LoadInventorySaveGame();	
+
+private:
+	UPROPERTY()
+	AInventoryCharacter* InventoryCharacter;
+
+	UPROPERTY()
+	FString Inventory_SlotName;
+
+	UPROPERTY()
+	UPlayerInventorySaveGame* PlayerInventorySaveGame;
 };

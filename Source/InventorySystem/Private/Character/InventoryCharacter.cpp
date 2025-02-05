@@ -136,103 +136,114 @@ void AInventoryCharacter::OnMeshOverlapEnd(UPrimitiveComponent* OverlappedCompon
 	}
 }
 
+void AInventoryCharacter::Server_LoadInventoryFromSaveGame_Implementation(const TArray<FInventoryContents>& InPlayerInventory)
+{
+	PlayerInventory = InPlayerInventory;
+}
+
 void AInventoryCharacter::RemoveItemFromInventory(TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld)
 {
-		if (PlayerInventory.IsEmpty())
+	if (PlayerInventory.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Inventory is empty. Cannot remove items."));
+		return;
+	}
+
+	FVector DropLocation = GetActorLocation();
+
+	if (bDropIntoWorld)
+	{
+		FVector Start = GetActorLocation();
+		FVector End = Start + (GetActorUpVector() * -500.f);
+		FHitResult HitResult;
+
+		bool bHit = UKismetSystemLibrary::LineTraceSingle(
+			this,
+			Start,
+			End,
+			UEngineTypes::ConvertToTraceType(ECC_Visibility),
+			false,
+			TArray<AActor*>(),
+			EDrawDebugTrace::ForDuration,
+			HitResult,
+			true
+		);
+
+		if (bHit)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Inventory is empty. Cannot remove items."));
-			return;
+			DropLocation = HitResult.Location;
 		}
 
-		FVector DropLocation = GetActorLocation();
+		FTransform SpawnTransform(FRotator(0.f, GetActorRotation().Yaw, 0.f), DropLocation);
 
-		if (bDropIntoWorld)
+		APickup* SpawnedPickup = Cast<APickup>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, APickup::StaticClass(), SpawnTransform));
+		if (SpawnedPickup)
 		{
-			FVector Start = GetActorLocation();
-			FVector End = Start + (GetActorUpVector() * -500.f);
-			FHitResult HitResult;
+			SpawnedPickup->SetItemDataTable(InventoryGameMode->GetItemDataTable());
+			SpawnedPickup->SetItemRowName(ItemInfo[0].ItemRowName);
+			SpawnedPickup->SetItemContents(ItemInfo);
 
-			bool bHit = UKismetSystemLibrary::LineTraceSingle(
-				this,
-				Start,
-				End,
-				UEngineTypes::ConvertToTraceType(ECC_Visibility),
-				false,
-				TArray<AActor*>(),
-				EDrawDebugTrace::ForDuration,
-				HitResult,
-				true
-			);
+			UGameplayStatics::FinishSpawningActor(SpawnedPickup, SpawnTransform);
 
-			if (bHit)
+			if (InventoryGameMode)
 			{
-				DropLocation = HitResult.Location;
-			}
-
-			FTransform SpawnTransform(FRotator(0.f, GetActorRotation().Yaw, 0.f), DropLocation);
-
-			APickup* SpawnedPickup = Cast<APickup>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, APickup::StaticClass(), SpawnTransform));
-			if (SpawnedPickup)
-			{
-				SpawnedPickup->SetItemDataTable(InventoryGameMode->GetItemDataTable());
-				SpawnedPickup->SetItemRowName(ItemInfo[0].ItemRowName);
-				SpawnedPickup->SetItemContents(ItemInfo);
-
-				UGameplayStatics::FinishSpawningActor(SpawnedPickup, SpawnTransform);
-
-				if (InventoryGameMode)
-				{
-					InventoryGameMode->Add_SavedPickupActor(SpawnedPickup);
-					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString("Pickup added to saved actors."));
-				}
+				InventoryGameMode->Add_SavedPickupActor(SpawnedPickup);
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString("Pickup added to saved actors."));
 			}
 		}
+	}
 
-		for (const FInventoryContents& InItemInfo : ItemInfo)
+	for (const FInventoryContents& InItemInfo : ItemInfo)
+	{
+		int32 ItemIndex = PlayerInventory.IndexOfByPredicate([&](const FInventoryContents& Item) {
+			return Item.ItemRowName == InItemInfo.ItemRowName;
+		});
+
+		if (ItemIndex != INDEX_NONE)
 		{
-			int32 ItemIndex = PlayerInventory.IndexOfByPredicate([&](const FInventoryContents& Item) {
-				return Item.ItemRowName == InItemInfo.ItemRowName;
-				});
+			int32 CurrentAmount = PlayerInventory[ItemIndex].ItemAmount;
+			int32 NewAmount = FMath::Max(0, CurrentAmount - InItemInfo.ItemAmount);
 
-			if (ItemIndex != INDEX_NONE)
+			if (NewAmount > 0)
 			{
-				int32 CurrentAmount = PlayerInventory[ItemIndex].ItemAmount;
-				int32 NewAmount = FMath::Max(0, CurrentAmount - InItemInfo.ItemAmount);
-
-				if (NewAmount > 0)
-				{
-					PlayerInventory[ItemIndex].ItemAmount = NewAmount;
-				}
-				else
-				{
-					PlayerInventory.RemoveAtSwap(ItemIndex, 1, false);
-				}
-
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Removed %d of %s. New amount: %d"),
-					InItemInfo.ItemAmount, *InItemInfo.ItemRowName.ToString(), NewAmount));
+				PlayerInventory[ItemIndex].ItemAmount = NewAmount;
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Item %s not found in inventory."), *InItemInfo.ItemRowName.ToString());
+				PlayerInventory.RemoveAtSwap(ItemIndex, 1, false);
 			}
+
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Removed %d of %s. New amount: %d"),
+				InItemInfo.ItemAmount, *InItemInfo.ItemRowName.ToString(), NewAmount));
 		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Item %s not found in inventory."), *InItemInfo.ItemRowName.ToString());
+		}
+	}
+	SaveCurrentInventory();
+}
+
+void AInventoryCharacter::SaveCurrentInventory()
+{
+	if (!IsValid(InventoryPlayerController))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Character: (SaveCurrentInventory) PlayerController is not valid."));
+		return;
+	}
+	InventoryPlayerController->SaveInventoryToSaveGame(PlayerInventory);
 }
 
 void AInventoryCharacter::AddItemToInventory(TArray<FInventoryContents>& PickupContents, APickup* InPickup)
 {	
-	FName ItemToAdd = "";
-	int32 AmountToAdd = 0;
-	bool bIsNewItem;
 	int32 ItemIndex = 0;
 	int32 CurrentAmountInInventory = 0;
-	int32 NewAmount = 0;
-	FString NewText = "";
 
 	for (const FInventoryContents& Pickups : PickupContents)
 	{
-		ItemToAdd = Pickups.ItemRowName;
-		AmountToAdd = Pickups.ItemAmount;
-		bIsNewItem = true;
+		FName ItemToAdd = Pickups.ItemRowName;
+		int32 AmountToAdd = Pickups.ItemAmount;
+		bool bIsNewItem = true;
 
 		for (int32 ArrayIndex = 0; ArrayIndex < PlayerInventory.Num(); ArrayIndex++)
 		{
@@ -244,9 +255,10 @@ void AInventoryCharacter::AddItemToInventory(TArray<FInventoryContents>& PickupC
 				break;
 			}
 		}
+		FString NewText = "";
 		if (bIsNewItem)
 		{
-			NewAmount = AmountToAdd;
+			int32 NewAmount = AmountToAdd;
 			FInventoryContents NewItem;
 			NewItem.ItemRowName = ItemToAdd;
 			NewItem.ItemAmount = NewAmount;
@@ -255,7 +267,7 @@ void AInventoryCharacter::AddItemToInventory(TArray<FInventoryContents>& PickupC
 		}
 		else
 		{
-			NewAmount = CurrentAmountInInventory + AmountToAdd;
+			int32 NewAmount = CurrentAmountInInventory + AmountToAdd;
 			PlayerInventory[ItemIndex].ItemRowName = ItemToAdd;
 			PlayerInventory[ItemIndex].ItemAmount = NewAmount;
 			NewText = FString::Printf(TEXT("Added Item %s x %d"), *ItemToAdd.ToString(), NewAmount);
@@ -263,10 +275,10 @@ void AInventoryCharacter::AddItemToInventory(TArray<FInventoryContents>& PickupC
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, NewText);
 	}
 	InventoryGameMode->Remove_SavedPickupActor(InPickup);
-	return;
+	SaveCurrentInventory();
 }
 
-void AInventoryCharacter::ServerInteractWithInInteractable_Implementation()
+void AInventoryCharacter::Server_InteractWithInInteractable_Implementation()
 {
 	if (IsValid(InteractableActor) && InteractableActor->Implements<UInteractableInterface>())
 	{
@@ -318,7 +330,7 @@ void AInventoryCharacter::Look(const FInputActionValue& Value)
 
 void AInventoryCharacter::Interact()
 {
-	ServerInteractWithInInteractable();
+	Server_InteractWithInInteractable();
 }
 
 void AInventoryCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -346,6 +358,7 @@ void AInventoryCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AInventoryCharacter, PlayerInventory);
+	DOREPLIFETIME(AInventoryCharacter, InventoryPlayerController);
 }
 
 void AInventoryCharacter::PossessedBy(AController* NewController)

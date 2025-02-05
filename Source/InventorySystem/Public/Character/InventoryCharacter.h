@@ -30,9 +30,17 @@ public:
 
 	void AddItemToInventory(TArray<FInventoryContents>& PickupContents, APickup* InPickup);
 
+	/** Server */
+	UFUNCTION(Server, Reliable)
+	void Server_LoadInventoryFromSaveGame(const TArray<FInventoryContents>& InPlayerInventory);
+	/** End Server */
+
 protected:
 	virtual void BeginPlay() override;
+
 	void SetupInputMapping();
+	void RemoveItemFromInventory(TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld);
+	void SaveCurrentInventory();
 
 	/** Player Input*/
 	void Move(const FInputActionValue& Value);
@@ -68,13 +76,10 @@ protected:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex);
 
+	/** Server */
 	UFUNCTION(Server, Reliable)
-	void ServerInteractWithInInteractable();
-
-	UPROPERTY(Replicated)
-	TArray<FInventoryContents> PlayerInventory;
-
-	void RemoveItemFromInventory(TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld);
+	void Server_InteractWithInInteractable();
+	/** End Server */
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -104,6 +109,9 @@ private:
 	UInputAction* InteractAction;
 	/** end Input Actions */
 
+	UPROPERTY(Replicated)
+	TArray<FInventoryContents> PlayerInventory;
+
 	float MouseSensitivity;
 
 	UPROPERTY()
@@ -112,6 +120,6 @@ private:
 	UPROPERTY()
 	AInventoryGameModeBase* InventoryGameMode;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AInventoryPlayerController* InventoryPlayerController;
 };

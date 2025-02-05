@@ -15,7 +15,16 @@ class INVENTORYSYSTEM_API UPlayerInventorySaveGame : public USaveGame
 {
 	GENERATED_BODY()
 
+public:
+	/** Setter */
+	void SetPlayerInventory(const TArray<FInventoryContents>& InPlayerInventory);
+	/** End Setter */
+
+	/** Getter */
+	FORCEINLINE TArray<FInventoryContents> GetPlayerInventory() const { return PlayerInventory; }
+	/** End Getter */
+
 private:
 	TArray<FInventoryContents> PlayerInventory;
-	
+
 };
