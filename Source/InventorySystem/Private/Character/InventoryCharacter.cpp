@@ -351,8 +351,8 @@ void AInventoryCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 void AInventoryCharacter::PossessedBy(AController* NewController)
 {	
 	Super::PossessedBy(NewController);
+
 	InventoryGameMode = InventoryGameMode == nullptr ? Cast<AInventoryGameModeBase>(UGameplayStatics::GetGameMode(this)) : InventoryGameMode;
 	InventoryPlayerController = InventoryPlayerController == nullptr ? Cast<AInventoryPlayerController>(NewController) : InventoryPlayerController;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("PlayerController: %s"), *InventoryPlayerController->GetActorNameOrLabel()));
 }
 
