@@ -6,6 +6,7 @@
 #include "Character/InventoryCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "SaveGame/PlayerInventorySaveGame.h"
+#include "Widgets/IngameWidget.h"
 
 void AInventoryPlayerController::OnPossess(APawn* aPawn)
 {	
@@ -20,11 +21,36 @@ void AInventoryPlayerController::BeginPlay()
 
 	InventoryCharacter = InventoryCharacter == nullptr ? Cast<AInventoryCharacter>(GetPawn()) : InventoryCharacter;
 
-	if (IsLocalPlayerController() && HasAuthority())
+	if (IsLocalPlayerController())
+	{	
+		UIShowIngameHUD();
+		if (HasAuthority())
+		{
+			Inventory_SlotName = "InventorySlot_00";
+			LoadInventorySaveGame();
+			InventoryCharacter->Server_LoadInventoryFromSaveGame(PlayerInventorySaveGame->GetPlayerInventory());
+		}		
+	}
+}
+
+void AInventoryPlayerController::UIShowIngameHUD()
+{	
+	if (IsValid(IngameWidget))
 	{
-		Inventory_SlotName = "InventorySlot_00";
-		LoadInventorySaveGame();
-		InventoryCharacter->Server_LoadInventoryFromSaveGame(PlayerInventorySaveGame->GetPlayerInventory());
+		IngameWidget->AddToViewport();
+	}
+	else
+	{	
+		if (IngameWidgetClass)
+		{
+			IngameWidget = CreateWidget<UIngameWidget>(this, IngameWidgetClass);
+			IngameWidget->AddToViewport();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerController: IngameWidgetClass is nullptr."));
+			return;
+		}
 	}
 }
 

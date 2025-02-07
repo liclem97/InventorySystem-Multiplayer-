@@ -10,6 +10,7 @@
 class AInventoryCharacter;
 class UPlayerInventorySaveGame;
 class USaveGame;
+class UIngameWidget;
 
 /**
  * 
@@ -27,6 +28,8 @@ protected:
 	virtual void OnPossess(APawn* aPawn) override;
 	virtual void BeginPlay() override;
 
+	void UIShowIngameHUD();
+
 	UFUNCTION(BlueprintCallable)
 	void LoadInventorySaveGame();	
 
@@ -42,4 +45,10 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	UPlayerInventorySaveGame* PlayerInventorySaveGame;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UIngameWidget> IngameWidgetClass;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	UIngameWidget* IngameWidget;
 };
