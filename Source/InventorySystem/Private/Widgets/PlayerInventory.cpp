@@ -32,7 +32,7 @@ void UPlayerInventory::Setup_InventoryGrid(const TArray<FInventoryContents>& InC
 				NewInventorySlot->SetOwningPlayer(GetOwningPlayer());
 
 				int32 Value = Local_InventorySlotWidgets.Add(NewInventorySlot);
-				int32 InRow = Value % 7;
+				int32 InRow = Value / 7;
 				int32 InColumn = Value % 7;
 				Local_InventoryGrid->GetInventoryGrid()->AddChildToUniformGrid(NewInventorySlot, InRow, InColumn);
 			}
