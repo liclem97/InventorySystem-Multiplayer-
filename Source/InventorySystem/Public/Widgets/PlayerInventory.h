@@ -17,8 +17,10 @@ class INVENTORYSYSTEM_API UPlayerInventory : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+	void Setup_InventoryGrid(const TArray<FInventoryContents>& InContents, bool bIsPlayerInventory, bool bIsWorldInventory);
+
 protected:
-	void Setup_InventoryGrid(TArray<FInventoryContents>& InContents, bool bPlayerInventory, bool bWorldInventory);	
 
 private:
 	UPROPERTY(meta = (BindWidget))

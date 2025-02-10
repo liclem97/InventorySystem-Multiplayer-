@@ -3,10 +3,12 @@
 
 #include "PlayerController/InventoryPlayerController.h"
 
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Character/InventoryCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "SaveGame/PlayerInventorySaveGame.h"
 #include "Widgets/IngameWidget.h"
+#include "Widgets/PlayerInventory.h"
 
 void AInventoryPlayerController::OnPossess(APawn* aPawn)
 {	
@@ -23,7 +25,7 @@ void AInventoryPlayerController::BeginPlay()
 
 	if (IsLocalPlayerController())
 	{	
-		UIShowIngameHUD();
+		UI_ShowIngameHUD();
 		if (HasAuthority())
 		{
 			Inventory_SlotName = "InventorySlot_00";
@@ -33,24 +35,75 @@ void AInventoryPlayerController::BeginPlay()
 	}
 }
 
-void AInventoryPlayerController::UIShowIngameHUD()
+void AInventoryPlayerController::UI_ShowIngameHUD()
 {	
-	if (IsValid(IngameWidget))
+	if (!IsValid(IngameWidget))
 	{
-		IngameWidget->AddToViewport();
-	}
-	else
-	{	
-		if (IngameWidgetClass)
-		{
-			IngameWidget = CreateWidget<UIngameWidget>(this, IngameWidgetClass);
-			IngameWidget->AddToViewport();
-		}
-		else
+		if (!IngameWidgetClass)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("PlayerController: IngameWidgetClass is nullptr."));
 			return;
 		}
+		IngameWidget = CreateWidget<UIngameWidget>(this, IngameWidgetClass);
+	}
+
+	if (!IsValid(IngameWidget))
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerController: Failed to create IngameWidget."));
+		return;
+	}
+
+	IngameWidget->AddToViewport();
+}
+
+void AInventoryPlayerController::HUD_UpdateInventoryGrid_Implementation(const TArray<FInventoryContents>& InContents, bool bIsPlayerInventory, bool bIsWorldInventory)
+{
+	if (IsValid(PlayerInventoryWidget) && PlayerInventoryWidget->IsInViewport())
+	{
+		PlayerInventoryWidget->Setup_InventoryGrid(InContents, bIsPlayerInventory, bIsWorldInventory);
+	}
+}
+
+void AInventoryPlayerController::UI_ShowInventoryMenu()
+{
+	if (!IsValid(PlayerInventoryWidget))
+	{
+		if (!PlayerInventoryClass)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerController: PlayerInventoryClass is nullptr."));
+			return;
+		}
+		PlayerInventoryWidget = CreateWidget<UPlayerInventory>(this, PlayerInventoryClass);
+	}
+
+	if (!IsValid(PlayerInventoryWidget))
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerController: Failed to create PlayerInventoryWidget."));
+		return;
+	}
+
+	PlayerInventoryWidget->AddToViewport();
+	SetShowMouseCursor(true);
+	UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(this, PlayerInventoryWidget, EMouseLockMode::DoNotLock, false);
+	PlayerInventoryWidget->Setup_InventoryGrid(InventoryCharacter->GetPlayerInventory(), true, false);
+	if (IsValid(IngameWidget) && IngameWidget->IsInViewport())
+	{
+		IngameWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void AInventoryPlayerController::LeaveInventoryMenu()
+{	
+	PlayerInventoryWidget = nullptr;
+	SetShowMouseCursor(false);
+	UWidgetBlueprintLibrary::SetInputMode_GameOnly(this);
+	if (IsValid(IngameWidget))
+	{
+		IngameWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		UI_ShowIngameHUD();
 	}
 }
 

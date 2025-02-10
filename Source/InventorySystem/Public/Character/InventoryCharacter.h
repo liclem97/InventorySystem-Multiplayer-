@@ -35,6 +35,10 @@ public:
 	void Server_LoadInventoryFromSaveGame(const TArray<FInventoryContents>& InPlayerInventory);
 	/** End Server */
 
+	/** Getter */
+	FORCEINLINE TArray<FInventoryContents> GetPlayerInventory() const { return PlayerInventory; }
+	/** End Getter*/
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -46,6 +50,7 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Interact();
+	void Inventory();
 	/** end Player Input*/
 
 	UFUNCTION()
@@ -107,6 +112,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* InteractAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* InventoryAction;
 	/** end Input Actions */
 
 	UPROPERTY(Replicated)

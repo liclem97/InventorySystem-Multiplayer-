@@ -7,9 +7,9 @@
 #include "Widgets/InventoryGrid.h"
 #include "Widgets/InventorySlot.h"
 
-void UPlayerInventory::Setup_InventoryGrid(TArray<FInventoryContents>& InContents, bool bPlayerInventory, bool bWorldInventory)
+void UPlayerInventory::Setup_InventoryGrid(const TArray<FInventoryContents>& InContents, bool bIsPlayerInventory, bool bIsWorldInventory)
 {
-	if (bPlayerInventory)
+	if (bIsPlayerInventory)
 	{
 		TArray<UInventorySlot*> Local_InventorySlotWidgets = All_InventorySlot_Player;
 		UInventoryGrid* Local_InventoryGrid = Grid_Inventory_Player;

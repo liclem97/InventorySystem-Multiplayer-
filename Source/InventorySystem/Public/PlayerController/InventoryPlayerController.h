@@ -11,6 +11,7 @@ class AInventoryCharacter;
 class UPlayerInventorySaveGame;
 class USaveGame;
 class UIngameWidget;
+class UPlayerInventory;
 
 /**
  * 
@@ -23,13 +24,23 @@ class INVENTORYSYSTEM_API AInventoryPlayerController : public APlayerController
 public:
 	UFUNCTION(Client, Reliable)
 	void SaveInventoryToSaveGame(const TArray<FInventoryContents>& InPlayerInventory);
-	
+
+	/** Getter */
+	FORCEINLINE UPlayerInventory* GetPlayerInventoryWidget() const { return PlayerInventoryWidget; }
+	/** End Getter*/
+
+	void UI_ShowInventoryMenu();
+	void LeaveInventoryMenu();
+
+	UFUNCTION(Client, Reliable)
+	void HUD_UpdateInventoryGrid(const TArray<FInventoryContents>& InContents, bool bIsPlayerInventory, bool bIsWorldInventory);
+
 protected:
 	virtual void OnPossess(APawn* aPawn) override;
 	virtual void BeginPlay() override;
 
-	void UIShowIngameHUD();
-
+	void UI_ShowIngameHUD();
+	
 	UFUNCTION(BlueprintCallable)
 	void LoadInventorySaveGame();	
 
@@ -51,4 +62,10 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	UIngameWidget* IngameWidget;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UPlayerInventory> PlayerInventoryClass;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	UPlayerInventory* PlayerInventoryWidget;
 };

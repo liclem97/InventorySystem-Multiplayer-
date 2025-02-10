@@ -20,6 +20,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "PlayerController/InventoryPlayerController.h"
+#include "Widgets/PlayerInventory.h"
 
 AInventoryCharacter::AInventoryCharacter()
 {
@@ -222,6 +223,7 @@ void AInventoryCharacter::RemoveItemFromInventory(TArray<FInventoryContents>& It
 		}
 	}
 	SaveCurrentInventory();
+	InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
 }
 
 void AInventoryCharacter::SaveCurrentInventory()
@@ -276,6 +278,7 @@ void AInventoryCharacter::AddItemToInventory(TArray<FInventoryContents>& PickupC
 	}
 	InventoryGameMode->Remove_SavedPickupActor(InPickup);
 	SaveCurrentInventory();
+	InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
 }
 
 void AInventoryCharacter::Server_InteractWithInInteractable_Implementation()
@@ -333,6 +336,25 @@ void AInventoryCharacter::Interact()
 	Server_InteractWithInInteractable();
 }
 
+void AInventoryCharacter::Inventory()
+{	
+	if (!InventoryPlayerController)
+	{
+		UE_LOG(LogTemp, Error, TEXT("InventoryCharacter: PlayerController is nullptr."));
+		return;
+	}
+
+	if (InventoryPlayerController->GetPlayerInventoryWidget())
+	{
+		InventoryPlayerController->GetPlayerInventoryWidget()->RemoveFromParent();
+		InventoryPlayerController->LeaveInventoryMenu();
+	}
+	else
+	{
+		InventoryPlayerController->UI_ShowInventoryMenu();
+	}	
+}
+
 void AInventoryCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -345,6 +367,7 @@ void AInventoryCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AInventoryCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AInventoryCharacter::Look);		
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AInventoryCharacter::Interact);
+		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AInventoryCharacter::Inventory);
 	}
 	else
 	{
