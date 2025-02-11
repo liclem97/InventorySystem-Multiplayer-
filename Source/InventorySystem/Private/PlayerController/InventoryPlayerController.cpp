@@ -3,6 +3,7 @@
 
 #include "PlayerController/InventoryPlayerController.h"
 
+#include "Actor/Container.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Character/InventoryCharacter.h"
 #include "Kismet/GameplayStatics.h"
@@ -105,6 +106,7 @@ void AInventoryPlayerController::LeaveInventoryMenu()
 	{
 		UI_ShowIngameHUD();
 	}
+	InventoryCharacter->Server_CloseContainer();
 }
 
 void AInventoryPlayerController::LoadInventorySaveGame()
@@ -124,6 +126,20 @@ void AInventoryPlayerController::LoadInventorySaveGame()
 		{
 			UE_LOG(LogTemp, Error, TEXT("PlayerController: Please Set PlayerInventory Savegame Class."));
 		}		
+	}
+}
+
+void AInventoryPlayerController::ContainerOpened(AContainer* InContainer)
+{
+	if (!IsValid(PlayerInventoryWidget) || !PlayerInventoryWidget->IsInViewport())
+	{
+		UI_ShowInventoryMenu();
+	}
+
+	if (IsValid(PlayerInventoryWidget))
+	{
+		PlayerInventoryWidget->Set_ContainerWidgetVisibility(true);
+		PlayerInventoryWidget->Setup_InventoryGrid(InContainer->GetContainerContents(), false, true);
 	}
 }
 

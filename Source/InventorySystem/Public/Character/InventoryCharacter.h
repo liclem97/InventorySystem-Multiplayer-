@@ -16,6 +16,7 @@ class USphereComponent;
 class APickup;
 class AInventoryGameModeBase;
 class AInventoryPlayerController;
+class AContainer;
 
 UCLASS()
 class INVENTORYSYSTEM_API AInventoryCharacter : public ACharacter
@@ -33,7 +34,19 @@ public:
 	/** Server */
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_LoadInventoryFromSaveGame(const TArray<FInventoryContents>& InPlayerInventory);
+
+	UFUNCTION(Server, Reliable)
+	void Server_CloseContainer();
 	/** End Server */
+
+	/** Client */
+	UFUNCTION(Client, Reliable)
+	void OpenContainer(AContainer* InContainer);
+	/** End Client*/
+
+	/** Setter */
+	void SetOpenedContainer(AContainer* NewContainer);
+	/** End Setter*/
 
 	/** Getter */
 	FORCEINLINE TArray<FInventoryContents> GetPlayerInventory() const { return PlayerInventory; }
@@ -86,6 +99,11 @@ protected:
 	void Server_InteractWithInInteractable();
 	/** End Server */
 
+	/** Client */
+	UFUNCTION(Client, Reliable)
+	void LeaveContainerTrigger();
+	/** End Client */
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
@@ -130,4 +148,7 @@ private:
 
 	UPROPERTY(Replicated)
 	AInventoryPlayerController* InventoryPlayerController;
+
+	UPROPERTY(Replicated)
+	AContainer* OpenedContainer;
 };

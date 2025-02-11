@@ -12,6 +12,7 @@ class UPlayerInventorySaveGame;
 class USaveGame;
 class UIngameWidget;
 class UPlayerInventory;
+class AContainer;
 
 /**
  * 
@@ -34,6 +35,8 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void HUD_UpdateInventoryGrid(const TArray<FInventoryContents>& InContents, bool bIsPlayerInventory, bool bIsWorldInventory);
+	
+	void ContainerOpened(AContainer* InContainer);
 
 protected:
 	virtual void OnPossess(APawn* aPawn) override;

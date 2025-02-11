@@ -13,7 +13,7 @@
 APickup::APickup()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	bReplicates = true;
+	SetReplicates(true);
 
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	SetRootComponent(Root);

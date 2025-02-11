@@ -3,6 +3,7 @@
 
 #include "Character/InventoryCharacter.h"
 
+#include "Actor/Container.h"
 #include "Actor/Pickup.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -134,6 +135,56 @@ void AInventoryCharacter::OnMeshOverlapEnd(UPrimitiveComponent* OverlappedCompon
 	if (OtherActor == InteractableActor)
 	{
 		InteractableActor = nullptr;
+		if (IsValid(OpenedContainer))
+		{
+			LeaveContainerTrigger();
+		}
+	}
+}
+
+void AInventoryCharacter::LeaveContainerTrigger_Implementation()
+{
+	if (InventoryPlayerController)
+	{
+		InventoryPlayerController->GetPlayerInventoryWidget()->RemoveFromParent();
+		InventoryPlayerController->LeaveInventoryMenu();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Character: InventoryPlayerController is nullptr."));
+		return;
+	}
+}
+
+void AInventoryCharacter::Server_CloseContainer_Implementation()
+{
+	if (IsValid(OpenedContainer))
+	{
+		// 먼저 배열에 해당 플레이어가 있는지 확인
+		if (OpenedContainer->GetInteractionPlayers().Contains(this))
+		{
+			// 플레이어가 존재하면 제거
+			OpenedContainer->GetInteractionPlayers().Remove(this);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString("Player Removed from InteractingPlayers"));
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString("Player NOT Found in InteractingPlayers"));
+		}
+	}
+	OpenedContainer = nullptr;
+}
+
+void AInventoryCharacter::OpenContainer_Implementation(AContainer* InContainer)
+{
+	if (InventoryPlayerController)
+	{
+		InventoryPlayerController->ContainerOpened(InContainer);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Character: InventoryPlayerController is nullptr."));
+		return;
 	}
 }
 
@@ -281,11 +332,19 @@ void AInventoryCharacter::AddItemToInventory(TArray<FInventoryContents>& PickupC
 	InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
 }
 
+void AInventoryCharacter::SetOpenedContainer(AContainer* NewContainer)
+{
+	OpenedContainer = NewContainer;
+}
+
 void AInventoryCharacter::Server_InteractWithInInteractable_Implementation()
 {
 	if (IsValid(InteractableActor) && InteractableActor->Implements<UInteractableInterface>())
-	{
-		IInteractableInterface::Execute_InteractWithActor(InteractableActor, this);
+	{	
+		if (!IsValid(OpenedContainer))
+		{
+			IInteractableInterface::Execute_InteractWithActor(InteractableActor, this);
+		}		
 	}
 	else
 	{	
@@ -382,6 +441,7 @@ void AInventoryCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
 	DOREPLIFETIME(AInventoryCharacter, PlayerInventory);
 	DOREPLIFETIME(AInventoryCharacter, InventoryPlayerController);
+	DOREPLIFETIME(AInventoryCharacter, OpenedContainer);
 }
 
 void AInventoryCharacter::PossessedBy(AController* NewController)
