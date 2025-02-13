@@ -142,6 +142,30 @@ void AInventoryCharacter::OnMeshOverlapEnd(UPrimitiveComponent* OverlappedCompon
 	}
 }
 
+void AInventoryCharacter::Server_RemoveItemFromContainer_Implementation(const TArray<FInventoryContents>& InContents)
+{
+	if (InventoryGameMode && OpenedContainer)
+	{
+		InventoryGameMode->Remove_ItemFromContainer(InContents, OpenedContainer);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Character: GameMode or OpenedContainer is nullptr. -Server_RemoveItemFromContainer -"));
+	}
+}
+
+void AInventoryCharacter::Server_AddItemToContainer_Implementation(const TArray<FInventoryContents>& InContents)
+{
+	if (InventoryGameMode && OpenedContainer)
+	{	
+		InventoryGameMode->Add_ItemToContainer(InContents, OpenedContainer);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Character: GameMode or OpenedContainer is nullptr. - Server_AddItemToContainer -"));
+	}
+}
+
 void AInventoryCharacter::LeaveContainerTrigger_Implementation()
 {
 	if (InventoryPlayerController)
@@ -193,7 +217,12 @@ void AInventoryCharacter::Server_LoadInventoryFromSaveGame_Implementation(const 
 	PlayerInventory = InPlayerInventory;
 }
 
-void AInventoryCharacter::RemoveItemFromInventory(TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld)
+void AInventoryCharacter::Server_RemoveItemFromInventory_Implementation(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld)
+{
+	RemoveItemFromInventory(ItemInfo, bDropIntoWorld);
+}
+
+void AInventoryCharacter::RemoveItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld)
 {
 	if (PlayerInventory.IsEmpty())
 	{
@@ -287,7 +316,12 @@ void AInventoryCharacter::SaveCurrentInventory()
 	InventoryPlayerController->SaveInventoryToSaveGame(PlayerInventory);
 }
 
-void AInventoryCharacter::AddItemToInventory(TArray<FInventoryContents>& PickupContents, APickup* InPickup)
+void AInventoryCharacter::Server_AddItemToInventory_Implementation(const TArray<FInventoryContents>& PickupContents, APickup* InPickup)
+{
+	AddItemToInventory(PickupContents, InPickup);
+}
+
+void AInventoryCharacter::AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup)
 {	
 	int32 ItemIndex = 0;
 	int32 CurrentAmountInInventory = 0;
@@ -327,7 +361,10 @@ void AInventoryCharacter::AddItemToInventory(TArray<FInventoryContents>& PickupC
 		}
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, NewText);
 	}
-	InventoryGameMode->Remove_SavedPickupActor(InPickup);
+	if (IsValid(InPickup))
+	{
+		InventoryGameMode->Remove_SavedPickupActor(InPickup);
+	}
 	SaveCurrentInventory();
 	InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
 }

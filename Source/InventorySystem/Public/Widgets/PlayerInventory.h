@@ -11,6 +11,7 @@ class UInventoryGrid;
 class UInventorySlot;
 class UBorder;
 class UButton;
+class AInventoryCharacter;
 
 /**
  * 
@@ -28,7 +29,14 @@ protected:
 	virtual void NativeDestruct() override;
 	virtual void NativeConstruct() override;
 
+	UFUNCTION()
 	void OnClicked_Button_CloseContainer();
+
+	UFUNCTION()
+	void OnClicked_Button_PlaceItem();
+
+	UFUNCTION()
+	void OnClicked_Button_TakeItem();
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -46,6 +54,12 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* Button_CloseContainer;
 
+	UPROPERTY(meta = (BindWidget))
+	UButton* Button_TakeItem;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* Button_PlaceItem;
+
 	UPROPERTY()
 	TArray<UInventorySlot*> All_InventorySlot_Player;
 
@@ -54,4 +68,10 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UInventorySlot> InventorySlotClass;
+
+	UPROPERTY()
+	AInventoryCharacter* InventoryCharacter;
+
+	UPROPERTY()
+	FName Temp_ItemName;
 };

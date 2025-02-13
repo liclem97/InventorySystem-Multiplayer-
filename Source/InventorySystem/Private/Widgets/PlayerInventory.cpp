@@ -3,6 +3,7 @@
 
 #include "Widgets/PlayerInventory.h"
 
+#include "Character/InventoryCharacter.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/UniformGridPanel.h"
@@ -14,7 +15,11 @@ void UPlayerInventory::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	InventoryCharacter = Cast<AInventoryCharacter>(GetOwningPlayerPawn());
+
 	Button_CloseContainer->OnClicked.AddDynamic(this, &UPlayerInventory::OnClicked_Button_CloseContainer);
+	Button_PlaceItem->OnClicked.AddDynamic(this, &UPlayerInventory::OnClicked_Button_PlaceItem);
+	Button_TakeItem->OnClicked.AddDynamic(this, &UPlayerInventory::OnClicked_Button_TakeItem);
 }
 
 void UPlayerInventory::OnClicked_Button_CloseContainer()
@@ -24,6 +29,46 @@ void UPlayerInventory::OnClicked_Button_CloseContainer()
 	{
 		InventoryPlayerController->LeaveInventoryMenu();
 		this->RemoveFromParent();
+	}
+}
+
+void UPlayerInventory::OnClicked_Button_PlaceItem()
+{
+	if (!All_InventorySlot_Player.IsEmpty() && InventoryCharacter)
+	{
+		Temp_ItemName = All_InventorySlot_Player[0]->GetItemRowName();
+		TArray<FInventoryContents> Array;
+		FInventoryContents NewItem;
+		NewItem.ItemRowName = Temp_ItemName;
+		NewItem.ItemAmount = 1;
+		Array.Add(NewItem);
+
+		InventoryCharacter->Server_RemoveItemFromInventory(Array, false);
+		InventoryCharacter->Server_AddItemToContainer(Array);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerInventory: All_InventorySlot_Player is empty or InventoryCharacter is nullptr."));
+	}
+}
+
+void UPlayerInventory::OnClicked_Button_TakeItem()
+{
+	if (!All_InventorySlot_World.IsEmpty() && InventoryCharacter)
+	{
+		Temp_ItemName = All_InventorySlot_World[0]->GetItemRowName();
+		TArray<FInventoryContents> Array;
+		FInventoryContents NewItem;
+		NewItem.ItemRowName = Temp_ItemName;
+		NewItem.ItemAmount = 1;
+		Array.Add(NewItem);
+
+		InventoryCharacter->Server_RemoveItemFromContainer(Array);
+		InventoryCharacter->Server_AddItemToInventory(Array, nullptr);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerInventory: All_InventorySlot_World is empty or InventoryCharacter is nullptr."));
 	}
 }
 

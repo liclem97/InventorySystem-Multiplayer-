@@ -33,7 +33,7 @@ public:
 
 	/** Setter */
 	void SetItemRowName(FName InItemRowName);
-	void SetItemContents(TArray<FInventoryContents>& InItemContents);
+	void SetItemContents(const TArray<FInventoryContents>& InItemContents);
 	void SetItemDataTable(UDataTable* InItemDataTable);
 	/** End Setter */
 

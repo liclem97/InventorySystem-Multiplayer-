@@ -8,11 +8,12 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "PlayerController/InventoryPlayerController.h"
 
 AContainer::AContainer()
 {	
 	PrimaryActorTick.bCanEverTick = false;
-	SetReplicates(true);
+	bReplicates = true;
 
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	SetRootComponent(Root);
@@ -31,6 +32,7 @@ void AContainer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AContainer, ContainerMesh);
+	DOREPLIFETIME(AContainer, ContainerContents);
 }
 
 void AContainer::InteractWithActor_Implementation(AInventoryCharacter* PlayerCharacter)
@@ -44,4 +46,12 @@ void AContainer::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AContainer::ContainerContentsChanged()
+{
+	for (AInventoryCharacter* InPlayers : InteractingPlayers)
+	{
+		InPlayers->GetInventoryPlayerController()->HUD_UpdateInventoryGrid(ContainerContents, false, true);
+	}
 }

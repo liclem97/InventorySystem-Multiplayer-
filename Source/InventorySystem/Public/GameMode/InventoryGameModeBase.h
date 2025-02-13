@@ -10,6 +10,7 @@
 class UInventoryGameInstance;
 class UInventorySaveGame;
 class APickup;
+class AContainer;
 
 /**
  * 
@@ -21,6 +22,8 @@ class INVENTORYSYSTEM_API AInventoryGameModeBase : public AGameModeBase
 public:
 	void Remove_SavedPickupActor(APickup* InPickup);
 	void Add_SavedPickupActor(APickup* InPickup);
+	void Add_ItemToContainer(const TArray<FInventoryContents>& InContents, AContainer* InContainer);
+	void Remove_ItemFromContainer(const TArray<FInventoryContents>& InContents, AContainer* InContainer);
 
 	/** Getter */
 	FORCEINLINE UDataTable* GetItemDataTable() const { return ItemDataTable; }

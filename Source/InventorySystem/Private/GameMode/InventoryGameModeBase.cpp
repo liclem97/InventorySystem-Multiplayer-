@@ -3,6 +3,7 @@
 
 #include "GameMode/InventoryGameModeBase.h"
 
+#include "Actor/Container.h"
 #include "Actor/Pickup.h"
 #include "GameInstance/InventoryGameInstance.h"
 #include "Kismet/GameplayStatics.h"
@@ -84,6 +85,89 @@ void AInventoryGameModeBase::Setup_PickupActors(const TArray<FWorldInfo_PickupIt
 		}
 		return;
 	}
+}
+
+void AInventoryGameModeBase::Add_ItemToContainer(const TArray<FInventoryContents>& InContents, AContainer* InContainer)
+{	
+	for (const FInventoryContents &ArrayContents : InContents)
+	{
+		FName Local_ItemToAdd = ArrayContents.ItemRowName;
+		int32 Local_AmountToAdd = ArrayContents.ItemAmount;
+		bool Local_bIsNewItem = true;
+		int32 Local_CurrentAmountInContainer = 0;
+
+		const TArray<FInventoryContents>& ContainerContents = InContainer->GetContainerContents();
+		int32 Index = 0;
+
+		for (Index = 0; Index < ContainerContents.Num(); ++Index)
+		{
+			if (ContainerContents[Index].ItemRowName == Local_ItemToAdd)
+			{
+				Local_bIsNewItem = false;
+				Local_CurrentAmountInContainer = ContainerContents[Index].ItemAmount;
+				break;
+			}
+		}
+
+		FInventoryContents NewItem;
+		NewItem.ItemRowName = Local_ItemToAdd;
+
+		// TODO: ContainerContents를 직접 참조하고있기에 나중에 바꿔야함.
+		if (Local_bIsNewItem)
+		{				
+			NewItem.ItemAmount = Local_AmountToAdd;
+			InContainer->ContainerContents.Add(NewItem);
+		}
+		else
+		{
+			NewItem.ItemAmount = Local_AmountToAdd + Local_CurrentAmountInContainer;
+			InContainer->ContainerContents[Index] = NewItem;
+		}
+	}
+	InContainer->ContainerContentsChanged();
+}
+
+void AInventoryGameModeBase::Remove_ItemFromContainer(const TArray<FInventoryContents>& InContents, AContainer* InContainer)
+{
+	for (FInventoryContents ArrayContents : InContents)
+	{
+		FName Local_ItemToRemove = ArrayContents.ItemRowName;
+		int32 Local_AmountToRemove = ArrayContents.ItemAmount;
+		bool Local_bIsItemFound = false;
+		int32 Local_CurrentAmountInContainer = 0;
+
+		const TArray<FInventoryContents>& ContainerContents = InContainer->GetContainerContents();
+		int32 Index = 0;
+
+		for (Index = 0; Index < ContainerContents.Num(); ++Index)
+		{
+			if (ContainerContents[Index].ItemRowName == Local_ItemToRemove)
+			{
+				Local_bIsItemFound = true;
+				Local_CurrentAmountInContainer = ContainerContents[Index].ItemAmount;
+				break;
+			}
+		}
+
+		// TODO: ContainerContents를 직접 참조하고있기에 나중에 바꿔야함.
+		if (Local_bIsItemFound)
+		{
+			if (int32 Local_NewAmountInContainer = Local_CurrentAmountInContainer - Local_AmountToRemove > 0)
+			{	
+				InContainer->ContainerContents[Index].ItemRowName = Local_ItemToRemove;
+				InContainer->ContainerContents[Index].ItemAmount = Local_NewAmountInContainer;
+			}
+			else
+			{
+				InContainer->ContainerContents.RemoveAt(Index);
+			}
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString("ERROR: Item to remove not found! - GameMode->Remove_ItemFromContainer."));
+		}
+	}
+	InContainer->ContainerContentsChanged();
 }
 
 void AInventoryGameModeBase::Add_SavedPickupActor(APickup* InPickup)

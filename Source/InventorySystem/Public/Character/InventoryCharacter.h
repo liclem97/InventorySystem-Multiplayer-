@@ -29,7 +29,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PossessedBy(AController* NewController) override;
 
-	void AddItemToInventory(TArray<FInventoryContents>& PickupContents, APickup* InPickup);
+	void AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup);
 
 	/** Server */
 	UFUNCTION(Server, Reliable, BlueprintCallable)
@@ -37,6 +37,18 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_CloseContainer();
+
+	UFUNCTION(Server, Reliable)
+	void Server_AddItemToContainer(const TArray<FInventoryContents>& InContents);
+
+	UFUNCTION(Server, Reliable)
+	void Server_RemoveItemFromContainer(const TArray<FInventoryContents>& InContents);
+
+	UFUNCTION(Server, Reliable)
+	void Server_AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup);
+
+	UFUNCTION(Server, Reliable)
+	void Server_RemoveItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld);
 	/** End Server */
 
 	/** Client */
@@ -50,13 +62,14 @@ public:
 
 	/** Getter */
 	FORCEINLINE TArray<FInventoryContents> GetPlayerInventory() const { return PlayerInventory; }
+	FORCEINLINE AInventoryPlayerController* GetInventoryPlayerController() const { return InventoryPlayerController; }
 	/** End Getter*/
 
 protected:
 	virtual void BeginPlay() override;
 
 	void SetupInputMapping();
-	void RemoveItemFromInventory(TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld);
+	void RemoveItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld);
 	void SaveCurrentInventory();
 
 	/** Player Input*/

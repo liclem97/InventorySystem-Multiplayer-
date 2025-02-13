@@ -13,7 +13,7 @@
 APickup::APickup()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	SetReplicates(true);
+	bReplicates = true;
 
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	SetRootComponent(Root);
@@ -95,7 +95,7 @@ void APickup::SetItemRowName(FName InItemRowName)
 	ItemRowName = InItemRowName;
 }
 
-void APickup::SetItemContents(TArray<FInventoryContents>& InItemContents)
+void APickup::SetItemContents(const TArray<FInventoryContents>& InItemContents)
 {
 	ItemContents = InItemContents;
 }

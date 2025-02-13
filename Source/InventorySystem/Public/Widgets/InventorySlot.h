@@ -18,6 +18,10 @@ class INVENTORYSYSTEM_API UInventorySlot : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	/** Getter*/
+	FORCEINLINE FName GetItemRowName() const { return ItemRowName; }
+	/** End Getter*/
+
 	/** Setter */
 	void SetItemRowName(FName InItemRowName);
 	void SetPlayerInventory(UPlayerInventory* InPlayerInventory);

@@ -19,6 +19,7 @@ class INVENTORYSYSTEM_API AContainer : public AActor, public IInteractableInterf
 public:	
 	AContainer();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	void ContainerContentsChanged();
 
 	/** Getter */
 	TArray<FInventoryContents> GetContainerContents() const { return ContainerContents; }
@@ -29,11 +30,11 @@ public:
 	virtual void InteractWithActor_Implementation(AInventoryCharacter* PlayerCharacter) override;
 	/** end Interactable Interface*/
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"), Replicated)
+	TArray<FInventoryContents> ContainerContents;
+
 protected:
 	virtual void BeginPlay() override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"))
-	TArray<FInventoryContents> ContainerContents;
 
 private:
 	UPROPERTY()
