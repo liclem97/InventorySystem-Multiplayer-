@@ -19,6 +19,7 @@ class INVENTORYSYSTEM_API AContainer : public AActor, public IInteractableInterf
 public:	
 	AContainer();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void OnConstruction(const FTransform& Transform) override;
 	void ContainerContentsChanged();
 
 	/** Getter */
@@ -30,6 +31,7 @@ public:
 	/** Setter */
 	void SetContainerRowName(FName InRowName) { ContainerRowName = InRowName; }
 	void SetContainerContents(const TArray<FInventoryContents>& InContents) { ContainerContents = InContents; }
+	void SetContainerMesh(UStaticMesh* InMesh) { ContainerMesh->SetStaticMesh(InMesh); }
 	/** End Setter */
 
 	/** Interactable Interface */

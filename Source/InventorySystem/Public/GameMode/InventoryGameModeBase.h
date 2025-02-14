@@ -55,4 +55,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "DataTable")
 	UDataTable* ItemDataTable;
+
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMesh* ContainerMesh;
 };

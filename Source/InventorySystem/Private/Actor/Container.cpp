@@ -35,6 +35,11 @@ void AContainer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AContainer, ContainerContents);
 }
 
+void AContainer::OnConstruction(const FTransform& Transform)
+{
+	if (!HasAuthority()) return;
+}
+
 void AContainer::InteractWithActor_Implementation(AInventoryCharacter* PlayerCharacter)
 {
 	InteractingPlayers.AddUnique(PlayerCharacter);

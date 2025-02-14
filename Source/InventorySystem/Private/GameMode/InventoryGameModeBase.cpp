@@ -133,7 +133,7 @@ void AInventoryGameModeBase::Setup_ContainerActors(const TArray<FWorldInfo_Conta
 			SpawnedContainer = Cast<AContainer>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, AContainer::StaticClass(), SpawnTransform));
 			if (SpawnedContainer)
 			{
-				//SpawnedPickup->SetItemDataTable(ItemDataTable);
+				SpawnedContainer->SetContainerMesh(ContainerMesh);
 				SpawnedContainer->SetContainerRowName(InContainer.ContainerRowName);
 				SpawnedContainer->SetContainerContents(InContainer.ContainerContents);
 
