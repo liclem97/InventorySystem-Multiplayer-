@@ -24,13 +24,19 @@ public:
 	/** Getter */
 	TArray<FInventoryContents> GetContainerContents() const { return ContainerContents; }
 	TArray<AInventoryCharacter*> GetInteractionPlayers() const { return InteractingPlayers; }
+	FName GetContainerRowName() const { return ContainerRowName; }
 	/** End Getter*/
+
+	/** Setter */
+	void SetContainerRowName(FName InRowName) { ContainerRowName = InRowName; }
+	void SetContainerContents(const TArray<FInventoryContents>& InContents) { ContainerContents = InContents; }
+	/** End Setter */
 
 	/** Interactable Interface */
 	virtual void InteractWithActor_Implementation(AInventoryCharacter* PlayerCharacter) override;
 	/** end Interactable Interface*/
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"), Replicated)
+	UPROPERTY(EditAnywhere, Replicated)
 	TArray<FInventoryContents> ContainerContents;
 
 protected:
@@ -48,4 +54,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* BoxTrigger;
+
+	UPROPERTY()
+	FName ContainerRowName;
 };

@@ -32,6 +32,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	void Setup_PickupActors(const TArray<FWorldInfo_PickupItem>& All_PickupActorsInfo, bool bIsFirstTimeLoadingMap);
+	void Setup_ContainerActors(const TArray<FWorldInfo_Containers>& All_ContainerActorsInfo, bool bIsFirstTimeLoadingMap);
 
 private:
 	UPROPERTY()
@@ -45,6 +46,12 @@ private:
 
 	UPROPERTY()
 	TArray<FWorldInfo_PickupItem> All_SavedPickupActorsInfo;
+
+	UPROPERTY()
+	TArray<AContainer*> All_SavedContainerActors;
+
+	UPROPERTY()
+	TArray<FWorldInfo_Containers> All_SavedContainerActorsInfo;
 
 	UPROPERTY(EditDefaultsOnly, Category = "DataTable")
 	UDataTable* ItemDataTable;

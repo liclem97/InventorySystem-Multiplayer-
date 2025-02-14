@@ -20,7 +20,8 @@ class INVENTORYSYSTEM_API UInventoryGameInstance : public UGameInstance
 	
 public:
 	UInventorySaveGame* Initialize_GameWorldSave(FString SaveSlotName);
-	void Update_SavedPickupActors(TArray<FWorldInfo_PickupItem>& All_PickupActorsInfo);
+	void Update_SavedPickupActors(const TArray<FWorldInfo_PickupItem>& All_PickupActorsInfo);
+	void Update_SavedContainerActors(const TArray<FWorldInfo_Containers>& All_ContainerActorsInfo);
 
 	/** Getter */
 	FORCEINLINE UInventorySaveGame* GetSaveGameWorld() const { return SaveGameWorld; }

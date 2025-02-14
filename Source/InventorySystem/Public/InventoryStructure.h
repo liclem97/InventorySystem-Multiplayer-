@@ -53,3 +53,18 @@ struct FWorldInfo_PickupItem : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FTransform WorldTransform;
 };
+
+USTRUCT(BlueprintType)
+struct FWorldInfo_Containers : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	FName ContainerRowName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	TArray<FInventoryContents> ContainerContents;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	FTransform WorldTransform;
+};

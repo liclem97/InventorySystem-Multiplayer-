@@ -17,13 +17,15 @@ class INVENTORYSYSTEM_API UInventorySaveGame : public USaveGame
 
 public:
 	/** Setter */
-	void SetPickupActorsInfo(TArray<FWorldInfo_PickupItem>& InActorsInfo);
+	void SetPickupActorsInfo(const TArray<FWorldInfo_PickupItem>& InActorsInfo);
+	void SetContainerActorsInfo(const TArray<FWorldInfo_Containers>& InActorsInfo);
 	void SetIsFirstTimeLoadingMap(bool InFirstTimeLoadingMap);
 	/** End Setter */
 
 	/** Getter */
 	FORCEINLINE bool GetIsFirstTimeLoadingMap() const { return bIsFirstTimeLoadingMap; }
 	FORCEINLINE TArray<FWorldInfo_PickupItem> GetAllPickupActorsInfo() const { return All_PickupActorsInfo; }
+	FORCEINLINE TArray<FWorldInfo_Containers> GetAllContainerActorsInfo() const { return All_ContainerActorsInfo; }
 	/** End Getter */
 
 private:
@@ -31,5 +33,8 @@ private:
 	TArray<FWorldInfo_PickupItem> All_PickupActorsInfo;
 
 	UPROPERTY(VisibleAnywhere)
-	bool bIsFirstTimeLoadingMap = true;
+	TArray<FWorldInfo_Containers> All_ContainerActorsInfo;
+
+	UPROPERTY(VisibleAnywhere)
+	bool bIsFirstTimeLoadingMap = true;	
 };
