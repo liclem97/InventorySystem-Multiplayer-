@@ -5,15 +5,23 @@
 
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
+#include "Components/VerticalBox.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 void UIngameWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (!UKismetSystemLibrary::IsServer(this))
+	if (!UKismetSystemLibrary::IsServer(this)) //client
 	{
 		Set_SetSlotVisibility(true);
+	}
+	else //server
+	{
+		Border_DEBUG_ItemCounter->SetVisibility(ESlateVisibility::Visible);
+		//DEBUG_ItemCounter();
+		
+		//GetWorld()->GetTimerManager().SetTimer(TimerHandle_DebugItemCounter, this, &UIngameWidget::DEBUG_ItemCounter, 1.f, true);
 	}
 }
 

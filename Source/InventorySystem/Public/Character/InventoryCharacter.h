@@ -117,6 +117,9 @@ protected:
 	void LeaveContainerTrigger();
 	/** End Client */
 
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	TArray<FInventoryContents> PlayerInventory;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
@@ -147,9 +150,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* InventoryAction;
 	/** end Input Actions */
-
-	UPROPERTY(Replicated)
-	TArray<FInventoryContents> PlayerInventory;
 
 	float MouseSensitivity;
 

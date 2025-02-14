@@ -36,7 +36,7 @@ public:
 	virtual void InteractWithActor_Implementation(AInventoryCharacter* PlayerCharacter) override;
 	/** end Interactable Interface*/
 
-	UPROPERTY(EditAnywhere, Replicated)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated)
 	TArray<FInventoryContents> ContainerContents;
 
 protected:

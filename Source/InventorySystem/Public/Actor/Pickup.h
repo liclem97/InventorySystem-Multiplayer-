@@ -40,7 +40,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName ItemRowName;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
@@ -49,7 +49,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	UWidgetComponent* Widget_PickupName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FInventoryContents> ItemContents;
 
 private:
