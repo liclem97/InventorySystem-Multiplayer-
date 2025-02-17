@@ -41,13 +41,13 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_AddItemToContainer(const TArray<FInventoryContents>& InContents);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_RemoveItemFromContainer(const TArray<FInventoryContents>& InContents);
 
 	UFUNCTION(Server, Reliable)
 	void Server_AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_RemoveItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld);
 	/** End Server */
 

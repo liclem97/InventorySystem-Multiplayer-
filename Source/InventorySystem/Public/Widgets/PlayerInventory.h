@@ -29,6 +29,7 @@ public:
 	void ItemDropped(bool bDroppedInWorldInventory, bool bDroppedInPlayerInventory, FName InItemRowName, int32 InItemAmount, bool bWasWorldItem);
 
 	/** Getter */
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE AInventoryCharacter* GetInventoryCharacter() const { return InventoryCharacter; }
 	/** End Getter */
 

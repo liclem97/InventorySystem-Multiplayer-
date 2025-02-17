@@ -139,7 +139,8 @@ void UPlayerInventory::Setup_InventoryGrid(const TArray<FInventoryContents>& InC
 		{
 			NewInventorySlot->SetItemRowName(ArrayContents.ItemRowName);
 			NewInventorySlot->SetItemAmount(ArrayContents.ItemAmount);
-			NewInventorySlot->SetIsWorldItem(false);
+			if (bIsWorldInventory)	NewInventorySlot->SetIsWorldItem(true);
+			else NewInventorySlot->SetIsWorldItem(false);
 			NewInventorySlot->SetPlayerInventory(this);
 			NewInventorySlot->SetOwningPlayer(GetOwningPlayer());
 

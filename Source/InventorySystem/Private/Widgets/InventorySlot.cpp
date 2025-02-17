@@ -85,6 +85,7 @@ void UInventorySlot::RemoveDraggedItem()
 	NewContents.ItemAmount = ItemAmount;
 
 	TArray<FInventoryContents> ArrayContents;
+	ArrayContents.Empty();
 	ArrayContents.Add(NewContents);
 
 	if (bIsWorldItem)
