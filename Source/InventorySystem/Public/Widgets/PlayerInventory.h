@@ -25,10 +25,17 @@ public:
 	void Setup_InventoryGrid(const TArray<FInventoryContents>& InContents, bool bIsPlayerInventory, bool bIsWorldInventory);
 	void Set_ContainerWidgetVisibility(bool NewVisibility);
 
+	UFUNCTION(BlueprintCallable)
+	void ItemDropped(bool bDroppedInWorldInventory, bool bDroppedInPlayerInventory, FName InItemRowName, int32 InItemAmount, bool bWasWorldItem);
+
+	/** Getter */
+	FORCEINLINE AInventoryCharacter* GetInventoryCharacter() const { return InventoryCharacter; }
+	/** End Getter */
+
 protected:
 	virtual void NativeDestruct() override;
 	virtual void NativeConstruct() override;
-
+	
 	UFUNCTION()
 	void OnClicked_Button_CloseContainer();
 

@@ -3,10 +3,12 @@
 
 #include "Widgets/InventorySlot.h"
 
+#include "Character/InventoryCharacter.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
 #include "InventoryStructure.h"
 #include "Kismet/KismetTextLibrary.h"
+#include "Widgets/PlayerInventory.h"
 
 void UInventorySlot::SetItemRowName(FName InItemRowName)
 {
@@ -67,5 +69,30 @@ void UInventorySlot::Update_ItemAmount(int32 InItemAmount)
 	else
 	{
 		TextBlock_ItemAmount->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UInventorySlot::RemoveDraggedItem()
+{	
+	if (!PlayerInventory && PlayerInventory->GetInventoryCharacter())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("InventorySlot: PlayerInventory or InventoryCharacter is not valid."));
+		return;
+	}
+
+	FInventoryContents NewContents;
+	NewContents.ItemRowName = ItemRowName;
+	NewContents.ItemAmount = ItemAmount;
+
+	TArray<FInventoryContents> ArrayContents;
+	ArrayContents.Add(NewContents);
+
+	if (bIsWorldItem)
+	{
+		PlayerInventory->GetInventoryCharacter()->Server_RemoveItemFromContainer(ArrayContents);
+	}
+	else
+	{
+		PlayerInventory->GetInventoryCharacter()->Server_RemoveItemFromInventory(ArrayContents, false);
 	}
 }

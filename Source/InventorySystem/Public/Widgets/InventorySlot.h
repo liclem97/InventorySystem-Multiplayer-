@@ -33,6 +33,9 @@ protected:
 	virtual void NativeConstruct() override;
 	void Update_ItemAmount(int32 InItemAmount);
 
+	UFUNCTION(BlueprintCallable)
+	void RemoveDraggedItem();
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"))
 	FName ItemRowName;
 	
@@ -45,10 +48,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"))
 	bool bIsWorldItem;
 
-private:
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	UBorder* Border_Background;
-
+private:
 	UPROPERTY(meta = (BindWidget))
 	UBorder* Border_InventoryIcon;
 

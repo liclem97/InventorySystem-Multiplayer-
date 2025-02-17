@@ -15,11 +15,49 @@ void UPlayerInventory::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	InventoryCharacter = Cast<AInventoryCharacter>(GetOwningPlayerPawn());
+	InventoryCharacter = InventoryCharacter == nullptr ? Cast<AInventoryCharacter>(GetOwningPlayerPawn()) : InventoryCharacter;
+
+	Grid_Inventory_World->SetIsWorldInventory(true);
+	Grid_Inventory_World->SetPlayerInventory(this);
+
+	Grid_Inventory_Player->SetIsWorldInventory(false);
+	Grid_Inventory_Player->SetPlayerInventory(this);
 
 	Button_CloseContainer->OnClicked.AddDynamic(this, &UPlayerInventory::OnClicked_Button_CloseContainer);
 	Button_PlaceItem->OnClicked.AddDynamic(this, &UPlayerInventory::OnClicked_Button_PlaceItem);
 	Button_TakeItem->OnClicked.AddDynamic(this, &UPlayerInventory::OnClicked_Button_TakeItem);
+}
+
+void UPlayerInventory::ItemDropped(bool bDroppedInWorldInventory, bool bDroppedInPlayerInventory, FName InItemRowName, int32 InItemAmount, bool bWasWorldItem)
+{	
+	TArray<FInventoryContents> Local_DroppedItems;
+	FInventoryContents NewItem;
+	NewItem.ItemRowName = InItemRowName;
+	NewItem.ItemAmount = InItemAmount;
+	Local_DroppedItems.Add(NewItem);
+
+	if (bDroppedInWorldInventory)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString("Dropped on World Inventory."));
+		InventoryCharacter->Server_AddItemToContainer(Local_DroppedItems);
+	}
+	else if (bDroppedInPlayerInventory)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString("Dropped on Player Inventory."));
+		InventoryCharacter->Server_AddItemToInventory(Local_DroppedItems, nullptr);
+	}
+	else if (!bDroppedInWorldInventory && !bDroppedInPlayerInventory)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString("Dropped into World."));
+		if (bWasWorldItem)
+		{
+			InventoryCharacter->Server_AddItemToContainer(Local_DroppedItems);
+		}
+		else
+		{
+			InventoryCharacter->Server_AddItemToInventory(Local_DroppedItems, nullptr);
+		}
+	}
 }
 
 void UPlayerInventory::OnClicked_Button_CloseContainer()
