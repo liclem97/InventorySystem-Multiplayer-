@@ -215,6 +215,19 @@ void AInventoryCharacter::OpenContainer_Implementation(AContainer* InContainer)
 void AInventoryCharacter::Server_LoadInventoryFromSaveGame_Implementation(const TArray<FInventoryContents>& InPlayerInventory)
 {
 	PlayerInventory = InPlayerInventory;
+	InventorySize = 21;
+
+	// 배열 크기 조정.
+	PlayerInventory.SetNum(InventorySize);
+
+	// 나머지 슬롯을 "Empty"로 채움.
+	for (int32 i = PlayerInventory.Num(); i < InventorySize; i++)
+	{
+		FInventoryContents EmptySlot;
+		EmptySlot.ItemRowName = FName("Empty");
+		EmptySlot.ItemAmount = 0;
+		PlayerInventory[i] = EmptySlot;
+	}
 }
 
 void AInventoryCharacter::Server_RemoveItemFromInventory_Implementation(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld)

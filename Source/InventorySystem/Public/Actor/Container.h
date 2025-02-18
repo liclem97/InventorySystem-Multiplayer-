@@ -59,4 +59,6 @@ private:
 
 	UPROPERTY()
 	FName ContainerRowName;
+
+	int32 InventorySize;
 };

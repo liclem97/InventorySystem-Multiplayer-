@@ -51,6 +51,22 @@ void AContainer::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (HasAuthority())
+	{
+		InventorySize = 14;
+
+		// 배열 크기 조정.
+		ContainerContents.SetNum(InventorySize);
+
+		// 나머지 슬롯을 "Empty"로 채움.
+		for (int32 i = ContainerContents.Num(); i < InventorySize; i++)
+		{
+			FInventoryContents EmptySlot;
+			EmptySlot.ItemRowName = FName("Empty");
+			EmptySlot.ItemAmount = 0;
+			ContainerContents[i] = EmptySlot;
+		}
+	}
 }
 
 void AContainer::ContainerContentsChanged()

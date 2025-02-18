@@ -164,4 +164,6 @@ private:
 
 	UPROPERTY(Replicated)
 	AContainer* OpenedContainer;
+
+	int32 InventorySize;
 };
