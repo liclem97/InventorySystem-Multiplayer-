@@ -31,9 +31,8 @@ public:
 
 	void AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup, int32 InventoryIndex);
 
-	int32 FindSlotForItem(const FInventoryContents& Item);
-
-	void AddOrUpdateItemInSlot(int32 SlotIndex, const FInventoryContents& Item);
+	int32 FindEmptySlot() const; 
+	int32 FindFirstItemIndex() const;
 
 	/** Server */
 	UFUNCTION(Server, Reliable, BlueprintCallable)

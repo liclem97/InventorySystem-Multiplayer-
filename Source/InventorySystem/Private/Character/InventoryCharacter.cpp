@@ -242,38 +242,7 @@ void AInventoryCharacter::RemoveItemFromInventory(const TArray<FInventoryContent
 		return;
 	}
 
-	int32 DropIndex;
-
-	if (InventoryIndex == -1)
-	{
-		for (int32 i = 0; i < PlayerInventory.Num(); i++)
-		{
-			// 슬롯에 아이템이 있는 경우.
-			if (PlayerInventory[i].ItemRowName != FName("Empty"))
-			{
-				// 아이템이 두 개 이상인 경우.
-				if (PlayerInventory[i].ItemAmount > 1)
-				{
-					PlayerInventory[i].ItemAmount -= 1;
-					DropIndex = i;
-					break;
-				}
-				else
-				{
-					PlayerInventory[i].ItemRowName = FName("Empty");
-					PlayerInventory[i].ItemAmount = 0;
-					DropIndex = i;
-					break;
-				}
-			}
-		}
-	}
-	else
-	{
-		PlayerInventory[InventoryIndex].ItemRowName = FName("Empty");
-		PlayerInventory[InventoryIndex].ItemAmount = 0;
-		DropIndex = InventoryIndex;
-	}
+	UE_LOG(LogTemp, Warning, TEXT("Remove from Inventory Index: %d"), InventoryIndex);
 
 	FVector DropLocation = GetActorLocation();
 
@@ -306,7 +275,7 @@ void AInventoryCharacter::RemoveItemFromInventory(const TArray<FInventoryContent
 		if (SpawnedPickup)
 		{
 			SpawnedPickup->SetItemDataTable(InventoryGameMode->GetItemDataTable());
-			SpawnedPickup->SetItemRowName(ItemInfo[DropIndex].ItemRowName);
+			SpawnedPickup->SetItemRowName(ItemInfo[InventoryIndex].ItemRowName);
 			SpawnedPickup->SetItemContents(ItemInfo);
 
 			UGameplayStatics::FinishSpawningActor(SpawnedPickup, SpawnTransform);
@@ -319,6 +288,8 @@ void AInventoryCharacter::RemoveItemFromInventory(const TArray<FInventoryContent
 		}
 	}
 
+	PlayerInventory[InventoryIndex].ItemRowName = FName("Empty");
+	PlayerInventory[InventoryIndex].ItemAmount = 0;
 
 	SaveCurrentInventory();
 	InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
@@ -341,6 +312,8 @@ void AInventoryCharacter::Server_AddItemToInventory_Implementation(const TArray<
 
 void AInventoryCharacter::AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup, int32 InventoryIndex)
 {	
+	UE_LOG(LogTemp, Warning, TEXT("Add to Inventory Index: %d"), InventoryIndex);
+	
 	if (PickupContents.Num() > 1)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString("Warning: Pickup items can only contain 1 item."));
@@ -349,15 +322,15 @@ void AInventoryCharacter::AddItemToInventory(const TArray<FInventoryContents>& P
 
 	FInventoryContents Local_ContentToAdd = PickupContents[0];
 	int32 Local_InventoryIndex = InventoryIndex;	
-	FInventoryContents Local_PlayerInventoryContents;
-	if (Local_InventoryIndex == -1)
+	FInventoryContents Local_PlayerInventoryContents = PlayerInventory[Local_InventoryIndex];
+	/*if (Local_InventoryIndex == -1)
 	{
 		Local_PlayerInventoryContents = FInventoryContents();
 	}	
 	else
 	{
 		Local_PlayerInventoryContents = PlayerInventory[Local_InventoryIndex];
-	}
+	}*/
 	bool bIsSlotFound = false;
 
 	if (Local_InventoryIndex < 0)
@@ -501,6 +474,30 @@ void AInventoryCharacter::AddItemToInventory(const TArray<FInventoryContents>& P
 	}
 }
 
+int32 AInventoryCharacter::FindEmptySlot() const
+{	
+	for (int32 i = 0; i < PlayerInventory.Num(); i++)
+	{
+		if (PlayerInventory[i].ItemRowName == FName("Empty"))
+		{
+			return i;
+		}
+	}
+	return int32();
+}
+
+int32 AInventoryCharacter::FindFirstItemIndex() const
+{	
+	for (int32 i = 0; i < PlayerInventory.Num(); i++)
+	{
+		if (PlayerInventory[i].ItemRowName != FName("Empty"))
+		{
+			return i;
+		}
+	}
+	return int32();
+}
+
 void AInventoryCharacter::SetOpenedContainer(AContainer* NewContainer)
 {
 	OpenedContainer = NewContainer;
@@ -518,15 +515,23 @@ void AInventoryCharacter::Server_InteractWithInInteractable_Implementation()
 	else
 	{	
 		if (PlayerInventory.Num() > 0)
-		{
+		{	
+			int32 DropIndex = FindFirstItemIndex();
+
 			TArray<FInventoryContents> DropItemArray;
 			FInventoryContents DropItem;
-			DropItem.ItemRowName = PlayerInventory[0].ItemRowName;
+
+			DropItem.ItemRowName = PlayerInventory[DropIndex].ItemRowName;
 			DropItem.ItemAmount = 1;
 
 			DropItemArray.Add(DropItem);
 
-			RemoveItemFromInventory(DropItemArray, true, -1);
+			RemoveItemFromInventory(DropItemArray, true, DropIndex);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Display, TEXT("Nothing to interact"));
+			return;
 		}
 	}
 }

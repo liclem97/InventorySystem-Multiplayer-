@@ -70,8 +70,9 @@ void UPlayerInventory::OnClicked_Button_CloseContainer()
 	}
 }
 
+// Player Inventory -> World Container.
 void UPlayerInventory::OnClicked_Button_PlaceItem()
-{
+{	
 	if (!All_InventorySlot_Player.IsEmpty() && InventoryCharacter)
 	{
 		Temp_ItemName = All_InventorySlot_Player[0]->GetItemRowName();
@@ -81,7 +82,9 @@ void UPlayerInventory::OnClicked_Button_PlaceItem()
 		NewItem.ItemAmount = 1;
 		Array.Add(NewItem);
 
-		InventoryCharacter->Server_RemoveItemFromInventory(Array, false, -1);
+		int32 PlaceItemIndex = InventoryCharacter->FindFirstItemIndex();
+
+		InventoryCharacter->Server_RemoveItemFromInventory(Array, false, PlaceItemIndex);
 		InventoryCharacter->Server_AddItemToContainer(Array);
 	}
 	else
@@ -90,6 +93,7 @@ void UPlayerInventory::OnClicked_Button_PlaceItem()
 	}
 }
 
+// World Container -> Player Inventory.
 void UPlayerInventory::OnClicked_Button_TakeItem()
 {
 	if (!All_InventorySlot_World.IsEmpty() && InventoryCharacter)
@@ -101,8 +105,10 @@ void UPlayerInventory::OnClicked_Button_TakeItem()
 		NewItem.ItemAmount = 1;
 		Array.Add(NewItem);
 
+		int32 TakeItemIndex = InventoryCharacter->FindEmptySlot();
+
 		InventoryCharacter->Server_RemoveItemFromContainer(Array);
-		InventoryCharacter->Server_AddItemToInventory(Array, nullptr, -1);
+		InventoryCharacter->Server_AddItemToInventory(Array, nullptr, TakeItemIndex);
 	}
 	else
 	{

@@ -78,7 +78,8 @@ void APickup::OnConstruction(const FTransform& Transform)
 
 void APickup::InteractWithActor_Implementation(AInventoryCharacter* PlayerCharacter)
 {	
-	PlayerCharacter->AddItemToInventory(ItemContents, this, -1);
+	int32 EmptyIndex = PlayerCharacter->FindEmptySlot();
+	PlayerCharacter->AddItemToInventory(ItemContents, this, EmptyIndex);
 	Destroy();
 }
 
