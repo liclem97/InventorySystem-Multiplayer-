@@ -154,7 +154,15 @@ void UPlayerInventory::Setup_InventoryGrid(const TArray<FInventoryContents>& InC
 			int32 Value = Local_InventorySlotWidgets.Add(NewInventorySlot);
 			int32 InRow = Value / 7;
 			int32 InColumn = Value % 7;
-			Local_InventoryGrid->GetInventoryGrid()->AddChildToUniformGrid(NewInventorySlot, InRow, InColumn);
+
+			if (Local_InventoryGrid)
+			{
+				Local_InventoryGrid->GetInventoryGrid()->AddChildToUniformGrid(NewInventorySlot, InRow, InColumn);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("Setup_InventoryGrid: Local_InventoryGrid is nullptr. Please Set World or Player Inventory."));
+			}
 		}
 	}
 

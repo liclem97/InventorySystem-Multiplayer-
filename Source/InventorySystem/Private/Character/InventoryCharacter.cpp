@@ -312,165 +312,64 @@ void AInventoryCharacter::Server_AddItemToInventory_Implementation(const TArray<
 
 void AInventoryCharacter::AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup, int32 InventoryIndex)
 {	
+	// 현재 아이템을 각 슬롯에 한 개씩 추가하는 상태.
 	UE_LOG(LogTemp, Warning, TEXT("Add to Inventory Index: %d"), InventoryIndex);
 	
 	if (PickupContents.Num() > 1)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString("Warning: Pickup items can only contain 1 item."));
-		return;
 	}
 
-	FInventoryContents Local_ContentToAdd = PickupContents[0];
-	int32 Local_InventoryIndex = InventoryIndex;	
-	FInventoryContents Local_PlayerInventoryContents = PlayerInventory[Local_InventoryIndex];
-	/*if (Local_InventoryIndex == -1)
-	{
-		Local_PlayerInventoryContents = FInventoryContents();
-	}	
-	else
-	{
-		Local_PlayerInventoryContents = PlayerInventory[Local_InventoryIndex];
-	}*/
-	bool bIsSlotFound = false;
-
-	if (Local_InventoryIndex < 0)
+	// Empty 슬롯이 없으면 같은 아이템의 첫 번째 슬롯을 찾음.
+	if (InventoryIndex < 0)
 	{
 		for (int32 i = 0; i < PlayerInventory.Num(); i++)
 		{
-			const FInventoryContents& InPlayerInventory = PlayerInventory[i];
-			if (InPlayerInventory.ItemRowName == FName("Empty"))
+			if (PlayerInventory[i].ItemRowName == PickupContents[0].ItemRowName)
 			{
-				bIsSlotFound = true;
-				Local_InventoryIndex = i;
+				InventoryIndex = i;
 				break;
-			}
-		}
-
-		if (bIsSlotFound)
-		{
-			PlayerInventory[Local_InventoryIndex] = Local_ContentToAdd;
-			if (IsValid(InPickup) && InventoryGameMode)
-			{
-				InventoryGameMode->Remove_SavedPickupActor(InPickup);
-			}
-			SaveCurrentInventory();
-			if (InventoryPlayerController)
-			{
-				InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
-			}
-		}
-		else
-		{
-			for (int32 j = 0; j < PlayerInventory.Num(); j++)
-			{
-				const FInventoryContents& InPlayerInventory = PlayerInventory[j];
-
-				if (InPlayerInventory.ItemRowName == Local_ContentToAdd.ItemRowName)
-				{
-					bIsSlotFound = true;
-					Local_InventoryIndex = j;
-					Local_PlayerInventoryContents = InPlayerInventory;
-					break;
-				}
-			}
-			if (bIsSlotFound)
-			{
-				PlayerInventory[Local_InventoryIndex].ItemRowName = Local_PlayerInventoryContents.ItemRowName;
-				PlayerInventory[Local_InventoryIndex].ItemAmount = Local_ContentToAdd.ItemAmount + Local_PlayerInventoryContents.ItemAmount;
-				if (IsValid(InPickup) && InventoryGameMode)
-				{
-					InventoryGameMode->Remove_SavedPickupActor(InPickup);
-				}
-				SaveCurrentInventory();
-				if (InventoryPlayerController)
-				{
-					InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
-				}
 			}
 			else
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString("Inventory is full. Cannot add item."));
+				UE_LOG(LogTemp, Warning, TEXT("Inventory is full, Can't add item to inventory."));
 				return;
 			}
 		}
-	}	
-	else
+	}
+
+	bool bIsSlotFound = false;
+
+	// 아이템 이름이 같으면 수량 추가.
+	if (PlayerInventory[InventoryIndex].ItemRowName == PickupContents[0].ItemRowName)
 	{
-		if (Local_PlayerInventoryContents.ItemRowName == Local_ContentToAdd.ItemRowName)
-		{
-			PlayerInventory[Local_InventoryIndex].ItemRowName = Local_PlayerInventoryContents.ItemRowName;
-			PlayerInventory[Local_InventoryIndex].ItemAmount = Local_ContentToAdd.ItemAmount + Local_PlayerInventoryContents.ItemAmount;
-			if (IsValid(InPickup) && InventoryGameMode)
-			{
-				InventoryGameMode->Remove_SavedPickupActor(InPickup);
-			}
-			SaveCurrentInventory();
-			if (InventoryPlayerController)
-			{
-				InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
-			}
-		}
-		else if (Local_PlayerInventoryContents.ItemRowName == FName("Empty"))
-		{
-			for (int32 i = 0; i < PlayerInventory.Num(); i++)
-			{
-				const FInventoryContents& InPlayerInventory = PlayerInventory[i];
-				if (InPlayerInventory.ItemRowName == FName("Empty"))
-				{
-					bIsSlotFound = true;
-					Local_InventoryIndex = i;
-					break;
-				}
-			}
+		PlayerInventory[InventoryIndex].ItemAmount += PickupContents[0].ItemAmount;
+		SaveItemAndUpdateHUD(InPickup);
+	}
+	else if (PlayerInventory[InventoryIndex].ItemRowName == FName("Empty"))
+	{	
+		// Empty 슬롯이 있는지 확인.
+		if (FindEmptySlot() >= 0) bIsSlotFound = true;		
 
-			if (bIsSlotFound)
-			{
-				PlayerInventory[Local_InventoryIndex] = Local_ContentToAdd;
-				if (IsValid(InPickup) && InventoryGameMode)
-				{
-					InventoryGameMode->Remove_SavedPickupActor(InPickup);
-				}
-				SaveCurrentInventory();
-				if (InventoryPlayerController)
-				{
-					InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
-				}
-			}
-			else
-			{
-				for (int32 j = 0; j < PlayerInventory.Num(); j++)
-				{
-					const FInventoryContents& InPlayerInventory = PlayerInventory[j];
+		// Empty 슬롯이 있으면 해당 인덱스에 아이템을 추가 후 저장.
+		if (bIsSlotFound)
+		{
+			PlayerInventory[InventoryIndex] = PickupContents[0];
+			SaveItemAndUpdateHUD(InPickup);
+		}	
+	}
+}
 
-					if (InPlayerInventory.ItemRowName == Local_ContentToAdd.ItemRowName)
-					{
-						bIsSlotFound = true;
-						Local_InventoryIndex = j;
-						Local_PlayerInventoryContents = InPlayerInventory;
-						break;
-					}
-				}
-				if (bIsSlotFound)
-				{
-					PlayerInventory[Local_InventoryIndex].ItemRowName = Local_PlayerInventoryContents.ItemRowName;
-					PlayerInventory[Local_InventoryIndex].ItemAmount = Local_ContentToAdd.ItemAmount + Local_PlayerInventoryContents.ItemAmount;
-					if (IsValid(InPickup) && InventoryGameMode)
-					{
-						InventoryGameMode->Remove_SavedPickupActor(InPickup);
-					}
-					SaveCurrentInventory();
-					if (InventoryPlayerController)
-					{
-						InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
-					}
-				}
-				else
-				{
-					GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString("Inventory is full. Cannot add item."));
-					return;
-				}
-			}
-		}
+void AInventoryCharacter::SaveItemAndUpdateHUD(APickup* InPickup)
+{
+	if (IsValid(InPickup) && InventoryGameMode)
+	{
+		InventoryGameMode->Remove_SavedPickupActor(InPickup);
+	}
+	SaveCurrentInventory();
+	if (InventoryPlayerController)
+	{
+		InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
 	}
 }
 
@@ -483,7 +382,7 @@ int32 AInventoryCharacter::FindEmptySlot() const
 			return i;
 		}
 	}
-	return int32();
+	return -1;
 }
 
 int32 AInventoryCharacter::FindFirstItemIndex() const

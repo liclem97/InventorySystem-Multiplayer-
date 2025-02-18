@@ -30,6 +30,7 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 
 	void AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup, int32 InventoryIndex);
+	void SaveItemAndUpdateHUD(APickup* InPickup);
 
 	int32 FindEmptySlot() const; 
 	int32 FindFirstItemIndex() const;
