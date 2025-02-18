@@ -36,7 +36,7 @@ void UInventorySlot::NativeConstruct()
 
 	if (ItemRowName == FName("Empty"))
 	{
-		Border_InventoryIcon->SetBrushFromTexture(nullptr);
+		Border_InventoryIcon->SetVisibility(ESlateVisibility::Hidden);
 		TextBlock_ItemAmount->SetVisibility(ESlateVisibility::Hidden);
 	}
 	else
@@ -102,6 +102,6 @@ void UInventorySlot::RemoveDraggedItem()
 	}
 	else
 	{
-		PlayerInventory->GetInventoryCharacter()->Server_RemoveItemFromInventory(ArrayContents, false);
+		PlayerInventory->GetInventoryCharacter()->Server_RemoveItemFromInventory(ArrayContents, false, InventoryIndex);
 	}
 }

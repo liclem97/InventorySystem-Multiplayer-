@@ -26,7 +26,7 @@ public:
 	void Set_ContainerWidgetVisibility(bool NewVisibility);
 
 	UFUNCTION(BlueprintCallable)
-	void ItemDropped(bool bDroppedInWorldInventory, bool bDroppedInPlayerInventory, FName InItemRowName, int32 InItemAmount, bool bWasWorldItem);
+	void ItemDropped(bool bDroppedInWorldInventory, bool bDroppedInPlayerInventory, FName InItemRowName, int32 InItemAmount, bool bWasWorldItem, int32 InventoryIndex);
 
 	/** Getter */
 	UFUNCTION(BlueprintCallable)

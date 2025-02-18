@@ -78,7 +78,7 @@ void APickup::OnConstruction(const FTransform& Transform)
 
 void APickup::InteractWithActor_Implementation(AInventoryCharacter* PlayerCharacter)
 {	
-	PlayerCharacter->AddItemToInventory(ItemContents, this);
+	PlayerCharacter->AddItemToInventory(ItemContents, this, -1);
 	Destroy();
 }
 

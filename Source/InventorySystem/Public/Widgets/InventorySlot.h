@@ -27,6 +27,7 @@ public:
 	void SetPlayerInventory(UPlayerInventory* InPlayerInventory);
 	void SetItemAmount(int32 InItemAmount);
 	void SetIsWorldItem(bool bInIsWorldItem);
+	void SetInventoryIndex(int32 InIndex) { InventoryIndex = InIndex; }
 	/** End Setter*/
 
 protected:
@@ -50,6 +51,10 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	UBorder* Border_Background;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 InventoryIndex;
+
 private:
 	UPROPERTY(meta = (BindWidget))
 	UBorder* Border_InventoryIcon;
@@ -59,5 +64,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "DataTable")
 	UDataTable* ItemDataTable;
+
 	
 };

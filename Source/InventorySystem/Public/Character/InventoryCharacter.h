@@ -29,7 +29,11 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PossessedBy(AController* NewController) override;
 
-	void AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup);
+	void AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup, int32 InventoryIndex);
+
+	int32 FindSlotForItem(const FInventoryContents& Item);
+
+	void AddOrUpdateItemInSlot(int32 SlotIndex, const FInventoryContents& Item);
 
 	/** Server */
 	UFUNCTION(Server, Reliable, BlueprintCallable)
@@ -45,16 +49,18 @@ public:
 	void Server_RemoveItemFromContainer(const TArray<FInventoryContents>& InContents);
 
 	UFUNCTION(Server, Reliable)
-	void Server_AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup);
+	void Server_AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup, int32 InventoryIndex);
 
 	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void Server_RemoveItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld);
+	void Server_RemoveItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld, int32 InventoryIndex);
 	/** End Server */
 
 	/** Client */
 	UFUNCTION(Client, Reliable)
 	void OpenContainer(AContainer* InContainer);
 	/** End Client*/
+
+	void HandlePickupAndSave(APickup* InPickup);
 
 	/** Setter */
 	void SetOpenedContainer(AContainer* NewContainer);
@@ -69,7 +75,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	void SetupInputMapping();
-	void RemoveItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld);
+	void RemoveItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld, int32 InventoryIndex);
 	void SaveCurrentInventory();
 
 	/** Player Input*/
@@ -166,4 +172,5 @@ private:
 	AContainer* OpenedContainer;
 
 	int32 InventorySize;
+
 };

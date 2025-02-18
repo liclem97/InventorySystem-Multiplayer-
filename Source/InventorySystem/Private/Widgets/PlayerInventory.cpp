@@ -28,7 +28,7 @@ void UPlayerInventory::NativeConstruct()
 	Button_TakeItem->OnClicked.AddDynamic(this, &UPlayerInventory::OnClicked_Button_TakeItem);
 }
 
-void UPlayerInventory::ItemDropped(bool bDroppedInWorldInventory, bool bDroppedInPlayerInventory, FName InItemRowName, int32 InItemAmount, bool bWasWorldItem)
+void UPlayerInventory::ItemDropped(bool bDroppedInWorldInventory, bool bDroppedInPlayerInventory, FName InItemRowName, int32 InItemAmount, bool bWasWorldItem, int32 InventoryIndex)
 {	
 	TArray<FInventoryContents> Local_DroppedItems;
 	FInventoryContents NewItem;
@@ -44,7 +44,7 @@ void UPlayerInventory::ItemDropped(bool bDroppedInWorldInventory, bool bDroppedI
 	else if (bDroppedInPlayerInventory)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString("Dropped on Player Inventory."));
-		InventoryCharacter->Server_AddItemToInventory(Local_DroppedItems, nullptr);
+		InventoryCharacter->Server_AddItemToInventory(Local_DroppedItems, nullptr, InventoryIndex);
 	}
 	else if (!bDroppedInWorldInventory && !bDroppedInPlayerInventory)
 	{
@@ -55,7 +55,7 @@ void UPlayerInventory::ItemDropped(bool bDroppedInWorldInventory, bool bDroppedI
 		}
 		else
 		{
-			InventoryCharacter->Server_AddItemToInventory(Local_DroppedItems, nullptr);
+			InventoryCharacter->Server_AddItemToInventory(Local_DroppedItems, nullptr, InventoryIndex);
 		}
 	}
 }
@@ -81,7 +81,7 @@ void UPlayerInventory::OnClicked_Button_PlaceItem()
 		NewItem.ItemAmount = 1;
 		Array.Add(NewItem);
 
-		InventoryCharacter->Server_RemoveItemFromInventory(Array, false);
+		InventoryCharacter->Server_RemoveItemFromInventory(Array, false, -1);
 		InventoryCharacter->Server_AddItemToContainer(Array);
 	}
 	else
@@ -102,7 +102,7 @@ void UPlayerInventory::OnClicked_Button_TakeItem()
 		Array.Add(NewItem);
 
 		InventoryCharacter->Server_RemoveItemFromContainer(Array);
-		InventoryCharacter->Server_AddItemToInventory(Array, nullptr);
+		InventoryCharacter->Server_AddItemToInventory(Array, nullptr, -1);
 	}
 	else
 	{
@@ -132,18 +132,19 @@ void UPlayerInventory::Setup_InventoryGrid(const TArray<FInventoryContents>& InC
 	}
 	Local_InventorySlotWidgets.Empty();
 
-	for (FInventoryContents ArrayContents : InContents)
+	for (int32 i = 0; i < InContents.Num(); i++)
 	{
+		const FInventoryContents& ArrayContents = InContents[i];
+
 		UInventorySlot* NewInventorySlot = CreateWidget<UInventorySlot>(this, InventorySlotClass);
 		if (NewInventorySlot)
 		{
 			NewInventorySlot->SetItemRowName(ArrayContents.ItemRowName);
 			NewInventorySlot->SetItemAmount(ArrayContents.ItemAmount);
-			if (bIsWorldInventory)	NewInventorySlot->SetIsWorldItem(true);
-			else NewInventorySlot->SetIsWorldItem(false);
+			NewInventorySlot->SetIsWorldItem(bIsWorldInventory);
+			NewInventorySlot->SetInventoryIndex(i);
 			NewInventorySlot->SetPlayerInventory(this);
 			NewInventorySlot->SetOwningPlayer(GetOwningPlayer());
-
 			int32 Value = Local_InventorySlotWidgets.Add(NewInventorySlot);
 			int32 InRow = Value / 7;
 			int32 InColumn = Value % 7;
