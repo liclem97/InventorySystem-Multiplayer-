@@ -338,26 +338,16 @@ void AInventoryCharacter::AddItemToInventory(const TArray<FInventoryContents>& P
 		}
 	}
 
-	bool bIsSlotFound = false;
-
 	// 아이템 이름이 같으면 수량 추가.
 	if (PlayerInventory[InventoryIndex].ItemRowName == PickupContents[0].ItemRowName)
 	{
 		PlayerInventory[InventoryIndex].ItemAmount += PickupContents[0].ItemAmount;
-		SaveItemAndUpdateHUD(InPickup);
 	}
 	else if (PlayerInventory[InventoryIndex].ItemRowName == FName("Empty"))
 	{	
-		// Empty 슬롯이 있는지 확인.
-		if (FindEmptySlot() >= 0) bIsSlotFound = true;		
-
-		// Empty 슬롯이 있으면 해당 인덱스에 아이템을 추가 후 저장.
-		if (bIsSlotFound)
-		{
-			PlayerInventory[InventoryIndex] = PickupContents[0];
-			SaveItemAndUpdateHUD(InPickup);
-		}	
+		PlayerInventory[InventoryIndex] = PickupContents[0];
 	}
+	SaveItemAndUpdateHUD(InPickup);
 }
 
 void AInventoryCharacter::SaveItemAndUpdateHUD(APickup* InPickup)
