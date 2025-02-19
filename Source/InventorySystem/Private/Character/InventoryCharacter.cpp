@@ -202,13 +202,13 @@ void AInventoryCharacter::Server_CloseContainer_Implementation()
 
 void AInventoryCharacter::OpenContainer_Implementation(AContainer* InContainer)
 {
-	if (InventoryPlayerController)
+	if (InventoryPlayerController && InContainer)
 	{
 		InventoryPlayerController->ContainerOpened(InContainer);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Character: InventoryPlayerController is nullptr."));
+		UE_LOG(LogTemp, Warning, TEXT("Character: InventoryPlayerController or InContainer is nullptr."));
 		return;
 	}
 }
@@ -236,12 +236,6 @@ void AInventoryCharacter::Server_RemoveItemFromInventory_Implementation(const TA
 
 void AInventoryCharacter::RemoveItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld, int32 InventoryIndex)
 {
-	if (PlayerInventory.IsEmpty())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Inventory is empty. Cannot remove items."));
-		return;
-	}
-
 	UE_LOG(LogTemp, Warning, TEXT("Remove from Inventory Index: %d"), InventoryIndex);
 
 	FVector DropLocation = GetActorLocation();
@@ -275,7 +269,7 @@ void AInventoryCharacter::RemoveItemFromInventory(const TArray<FInventoryContent
 		if (SpawnedPickup)
 		{
 			SpawnedPickup->SetItemDataTable(InventoryGameMode->GetItemDataTable());
-			SpawnedPickup->SetItemRowName(ItemInfo[InventoryIndex].ItemRowName);
+			SpawnedPickup->SetItemRowName(ItemInfo[0].ItemRowName);
 			SpawnedPickup->SetItemContents(ItemInfo);
 
 			UGameplayStatics::FinishSpawningActor(SpawnedPickup, SpawnTransform);
@@ -283,13 +277,18 @@ void AInventoryCharacter::RemoveItemFromInventory(const TArray<FInventoryContent
 			if (InventoryGameMode)
 			{
 				InventoryGameMode->Add_SavedPickupActor(SpawnedPickup);
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString("Pickup added to saved actors."));
 			}
 		}
 	}
 
-	PlayerInventory[InventoryIndex].ItemRowName = FName("Empty");
-	PlayerInventory[InventoryIndex].ItemAmount = 0;
+	if (PlayerInventory[InventoryIndex].ItemAmount > 0)
+	{
+		PlayerInventory[InventoryIndex].ItemAmount -= 1;
+		if (PlayerInventory[InventoryIndex].ItemAmount == 0)
+		{
+			PlayerInventory[InventoryIndex].ItemRowName = FName("Empty");
+		}
+	}	
 
 	SaveCurrentInventory();
 	InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
@@ -384,7 +383,7 @@ int32 AInventoryCharacter::FindFirstItemIndex() const
 			return i;
 		}
 	}
-	return int32();
+	return -1;
 }
 
 void AInventoryCharacter::SetOpenedContainer(AContainer* NewContainer)
@@ -393,34 +392,38 @@ void AInventoryCharacter::SetOpenedContainer(AContainer* NewContainer)
 }
 
 void AInventoryCharacter::Server_InteractWithInInteractable_Implementation()
-{
+{	
 	if (IsValid(InteractableActor) && InteractableActor->Implements<UInteractableInterface>())
-	{	
-		if (!IsValid(OpenedContainer))
+	{
+		// 아이템 획득 or 창고 열기
+		if (OpenedContainer == nullptr)
 		{
 			IInteractableInterface::Execute_InteractWithActor(InteractableActor, this);
-		}		
+		}
+		else
+		{
+			OpenContainer(OpenedContainer);
+		}
 	}
-	else
-	{	
-		if (PlayerInventory.Num() > 0)
-		{	
-			int32 DropIndex = FindFirstItemIndex();
+	else // 아이템 드롭
+	{
+		int32 DropItemIndex = FindFirstItemIndex();
 
+		if (DropItemIndex >= 0)
+		{
 			TArray<FInventoryContents> DropItemArray;
 			FInventoryContents DropItem;
 
-			DropItem.ItemRowName = PlayerInventory[DropIndex].ItemRowName;
+			DropItem.ItemRowName = PlayerInventory[DropItemIndex].ItemRowName;
 			DropItem.ItemAmount = 1;
 
 			DropItemArray.Add(DropItem);
 
-			RemoveItemFromInventory(DropItemArray, true, DropIndex);
+			RemoveItemFromInventory(DropItemArray, true, DropItemIndex);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Display, TEXT("Nothing to interact"));
-			return;
+			UE_LOG(LogTemp, Warning, TEXT("Inventory is Empty. No Drop Items."));
 		}
 	}
 }
