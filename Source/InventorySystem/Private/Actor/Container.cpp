@@ -87,6 +87,18 @@ int32 AContainer::FindEmptySlot() const
 	return -1;
 }
 
+int32 AContainer::FindFirstItemIndex() const
+{
+	for (int32 i = 0; i < ContainerContents.Num(); i++)
+	{
+		if (ContainerContents[i].ItemRowName != FName("Empty"))
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
 int32 AContainer::FindItemIndex(const FName& ItemName) const
 {
 	for (int32 i = 0; i < ContainerContents.Num(); i++)

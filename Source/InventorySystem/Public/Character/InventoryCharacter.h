@@ -69,6 +69,7 @@ public:
 	/** Getter */
 	FORCEINLINE TArray<FInventoryContents> GetPlayerInventory() const { return PlayerInventory; }
 	FORCEINLINE AInventoryPlayerController* GetInventoryPlayerController() const { return InventoryPlayerController; }
+	FORCEINLINE AContainer* GetOpenedContainer() const { return OpenedContainer; }
 	/** End Getter*/
 
 protected:

@@ -196,60 +196,33 @@ void AInventoryGameModeBase::UpdateContainerInfo(AContainer* InContainer, int32 
 
 void AInventoryGameModeBase::Remove_ItemFromContainer(const TArray<FInventoryContents>& InContents, AContainer* InContainer)
 {	
-	int32 Local_ContainerWorldIndex = All_SavedContainerActors.Find(InContainer);
-	if (Local_ContainerWorldIndex == INDEX_NONE)
+	int32 ContainerIndex = All_SavedContainerActors.Find(InContainer);
+	if (ContainerIndex == INDEX_NONE)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString("ERROR: Container not found in world! - GameMode->Add_ItemToContainer."));
 		return;
 	}
 
-	if (Local_ContainerWorldIndex >= 0)
+	for (const FInventoryContents& ItemToRemove : InContents)
 	{
-		for (FInventoryContents ArrayContents : InContents)
+		int32 RemoveIndex = InContainer->FindFirstItemIndex();
+		if (RemoveIndex >= 0)
 		{
-			FName Local_ItemToRemove = ArrayContents.ItemRowName;
-			int32 Local_AmountToRemove = ArrayContents.ItemAmount;
-			bool Local_bIsItemFound = false;
-			int32 Local_CurrentAmountInContainer = 0;
-
-			const TArray<FInventoryContents>& ContainerContents = InContainer->GetContainerContents();
-			int32 Index = 0;
-
-			for (Index = 0; Index < ContainerContents.Num(); ++Index)
+			InContainer->ContainerContents[RemoveIndex].ItemAmount -= ItemToRemove.ItemAmount;
+			if (InContainer->ContainerContents[RemoveIndex].ItemAmount <= 0)
 			{
-				if (ContainerContents[Index].ItemRowName == Local_ItemToRemove)
-				{
-					Local_bIsItemFound = true;
-					Local_CurrentAmountInContainer = ContainerContents[Index].ItemAmount;
-					break;
-				}
-			}
-
-			// TODO: ContainerContents를 직접 참조하고있기에 나중에 바꿔야함.
-			if (Local_bIsItemFound)
-			{
-				if (int32 Local_NewAmountInContainer = Local_CurrentAmountInContainer - Local_AmountToRemove > 0)
-				{
-					InContainer->ContainerContents[Index].ItemRowName = Local_ItemToRemove;
-					InContainer->ContainerContents[Index].ItemAmount = Local_NewAmountInContainer;
-				}
-				else
-				{
-					InContainer->ContainerContents.RemoveAt(Index);
-				}
-			}
-			else
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString("ERROR: Item to remove not found! - GameMode->Remove_ItemFromContainer."));
+				InContainer->ContainerContents[RemoveIndex].ItemRowName = FName("Empty");
+				InContainer->ContainerContents[RemoveIndex].ItemAmount = 0;
 			}
 		}
-		All_SavedContainerActors[Local_ContainerWorldIndex] = InContainer;
-		All_SavedContainerActorsInfo[Local_ContainerWorldIndex].ContainerContents = InContainer->ContainerContents;
-		All_SavedContainerActorsInfo[Local_ContainerWorldIndex].WorldTransform = InContainer->GetActorTransform();
-		All_SavedContainerActorsInfo[Local_ContainerWorldIndex].ContainerRowName = InContainer->GetContainerRowName();
-		InventoryGameInstance->Update_SavedContainerActors(All_SavedContainerActorsInfo);
-		InContainer->ContainerContentsChanged();
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Container is empty. Can't remove item."));
+			return;
+		}
 	}	
+
+	UpdateContainerInfo(InContainer, ContainerIndex);
 }
 
 void AInventoryGameModeBase::Add_SavedPickupActor(APickup* InPickup)

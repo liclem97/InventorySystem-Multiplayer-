@@ -3,6 +3,7 @@
 
 #include "Widgets/PlayerInventory.h"
 
+#include "Actor/Container.h"
 #include "Character/InventoryCharacter.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -88,7 +89,6 @@ void UPlayerInventory::OnClicked_Button_PlaceItem()
 		PlaceItem.ItemAmount = 1;
 		PlaceArray.Add(PlaceItem);
 
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("NewItem.ItemRowName: %s"), *NewItem.ItemRowName.ToString()));
 		InventoryCharacter->Server_RemoveItemFromInventory(PlaceArray, false, PlaceItemIndex);
 		InventoryCharacter->Server_AddItemToContainer(PlaceArray);
 	}
@@ -101,23 +101,29 @@ void UPlayerInventory::OnClicked_Button_PlaceItem()
 // World Container -> Player Inventory.
 void UPlayerInventory::OnClicked_Button_TakeItem()
 {
-	if (!All_InventorySlot_World.IsEmpty() && InventoryCharacter)
-	{
-		Temp_ItemName = All_InventorySlot_World[0]->GetItemRowName();
-		TArray<FInventoryContents> Array;
-		FInventoryContents NewItem;
-		NewItem.ItemRowName = Temp_ItemName;
-		NewItem.ItemAmount = 1;
-		Array.Add(NewItem);
+	if (!All_InventorySlot_World.IsEmpty() && InventoryCharacter && InventoryCharacter->GetOpenedContainer())
+	{	
+		int32 ItemIndex = InventoryCharacter->GetOpenedContainer()->FindFirstItemIndex();
+		if (ItemIndex == -1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerInventory: No item found in World Inventory."));
+			return;
+		}
+		Temp_ItemName = All_InventorySlot_World[ItemIndex]->GetItemRowName();
+		TArray<FInventoryContents> TakeArray;
+		FInventoryContents TakeItem;
+		TakeItem.ItemRowName = Temp_ItemName;
+		TakeItem.ItemAmount = 1;
+		TakeArray.Add(TakeItem);
 
 		int32 TakeItemIndex = InventoryCharacter->FindEmptySlot();
 
-		InventoryCharacter->Server_RemoveItemFromContainer(Array);
-		InventoryCharacter->Server_AddItemToInventory(Array, nullptr, TakeItemIndex);
+		InventoryCharacter->Server_RemoveItemFromContainer(TakeArray);
+		InventoryCharacter->Server_AddItemToInventory(TakeArray, nullptr, TakeItemIndex);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerInventory: All_InventorySlot_World is empty or InventoryCharacter is nullptr."));
+		UE_LOG(LogTemp, Warning, TEXT("PlayerInventory: All_InventorySlot_World is empty or InventoryCharacter or OpenedContainer is nullptr."));
 	}
 }
 

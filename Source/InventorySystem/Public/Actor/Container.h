@@ -23,6 +23,7 @@ public:
 	void ContainerContentsChanged();
 
 	int32 FindEmptySlot() const;
+	int32 FindFirstItemIndex() const;
 	int32 FindItemIndex(const FName& ItemName) const;
 
 	/** Getter */
