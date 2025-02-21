@@ -74,3 +74,27 @@ void AContainer::ContainerContentsChanged()
 		InPlayers->GetInventoryPlayerController()->HUD_UpdateInventoryGrid(ContainerContents, false, true);
 	}
 }
+
+int32 AContainer::FindEmptySlot() const
+{	
+	for (int32 i = 0; i < ContainerContents.Num(); i++)
+	{
+		if (ContainerContents[i].ItemRowName == FName("Empty"))
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+int32 AContainer::FindItemIndex(const FName& ItemName) const
+{
+	for (int32 i = 0; i < ContainerContents.Num(); i++)
+	{
+		if (ContainerContents[i].ItemRowName == ItemName)
+		{
+			return i;
+		}
+	}
+	return -1;
+}

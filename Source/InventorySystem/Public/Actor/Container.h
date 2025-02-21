@@ -22,6 +22,9 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	void ContainerContentsChanged();
 
+	int32 FindEmptySlot() const;
+	int32 FindItemIndex(const FName& ItemName) const;
+
 	/** Getter */
 	TArray<FInventoryContents> GetContainerContents() const { return ContainerContents; }
 	TArray<AInventoryCharacter*> GetInteractionPlayers() const { return InteractingPlayers; }

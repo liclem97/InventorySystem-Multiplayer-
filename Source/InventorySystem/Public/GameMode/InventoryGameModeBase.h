@@ -33,6 +33,7 @@ protected:
 	virtual void BeginPlay() override;
 	void Setup_PickupActors(const TArray<FWorldInfo_PickupItem>& All_PickupActorsInfo, bool bIsFirstTimeLoadingMap);
 	void Setup_ContainerActors(const TArray<FWorldInfo_Containers>& All_ContainerActorsInfo, bool bIsFirstTimeLoadingMap);
+	void UpdateContainerInfo(AContainer* InContainer, int32 ContainerIndex);
 
 private:
 	UPROPERTY()

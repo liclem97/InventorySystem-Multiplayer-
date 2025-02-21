@@ -74,18 +74,23 @@ void UPlayerInventory::OnClicked_Button_CloseContainer()
 void UPlayerInventory::OnClicked_Button_PlaceItem()
 {	
 	if (!All_InventorySlot_Player.IsEmpty() && InventoryCharacter)
-	{
-		Temp_ItemName = All_InventorySlot_Player[0]->GetItemRowName();
-		TArray<FInventoryContents> Array;
-		FInventoryContents NewItem;
-		NewItem.ItemRowName = Temp_ItemName;
-		NewItem.ItemAmount = 1;
-		Array.Add(NewItem);
-
+	{	
 		int32 PlaceItemIndex = InventoryCharacter->FindFirstItemIndex();
+		if (PlaceItemIndex == -1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerInventory: No item found in Player Inventory."));
+			return;
+		}
+		Temp_ItemName = All_InventorySlot_Player[PlaceItemIndex]->GetItemRowName();
+		TArray<FInventoryContents> PlaceArray;
+		FInventoryContents PlaceItem;
+		PlaceItem.ItemRowName = Temp_ItemName;
+		PlaceItem.ItemAmount = 1;
+		PlaceArray.Add(PlaceItem);
 
-		InventoryCharacter->Server_RemoveItemFromInventory(Array, false, PlaceItemIndex);
-		InventoryCharacter->Server_AddItemToContainer(Array);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("NewItem.ItemRowName: %s"), *NewItem.ItemRowName.ToString()));
+		InventoryCharacter->Server_RemoveItemFromInventory(PlaceArray, false, PlaceItemIndex);
+		InventoryCharacter->Server_AddItemToContainer(PlaceArray);
 	}
 	else
 	{

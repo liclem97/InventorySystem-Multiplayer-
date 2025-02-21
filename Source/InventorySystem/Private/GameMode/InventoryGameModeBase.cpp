@@ -148,57 +148,50 @@ void AInventoryGameModeBase::Setup_ContainerActors(const TArray<FWorldInfo_Conta
 
 void AInventoryGameModeBase::Add_ItemToContainer(const TArray<FInventoryContents>& InContents, AContainer* InContainer)
 {	
-	int32 Local_ContainerWorldIndex = All_SavedContainerActors.Find(InContainer);
-	if (Local_ContainerWorldIndex == INDEX_NONE)
+	int32 ContainerIndex = All_SavedContainerActors.Find(InContainer);
+	if (ContainerIndex == INDEX_NONE)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString("ERROR: Container not found in world! - GameMode->Add_ItemToContainer."));
 		return;
 	}
-
-	if (Local_ContainerWorldIndex >= 0)
+	
+	for (const FInventoryContents& ItemToAdd : InContents)
 	{
-		for (const FInventoryContents& ArrayContents : InContents)
+		int32 ItemIndex = InContainer->FindItemIndex(ItemToAdd.ItemRowName);
+
+		if (ItemIndex >= 0)
 		{
-			FName Local_ItemToAdd = ArrayContents.ItemRowName;
-			int32 Local_AmountToAdd = ArrayContents.ItemAmount;
-			bool Local_bIsNewItem = true;
-			int32 Local_CurrentAmountInContainer = 0;
-
-			const TArray<FInventoryContents>& ContainerContents = InContainer->GetContainerContents();
-			int32 Index = 0;
-
-			for (Index = 0; Index < ContainerContents.Num(); ++Index)
+			// 아이템이 이미 존재하기 때문에 수량한 업데이트.
+			InContainer->ContainerContents[ItemIndex].ItemAmount += ItemToAdd.ItemAmount;
+		}
+		else
+		{
+			// 새로운 아이템이기 때문에 Empty 슬롯을 찾아서 추가.
+			int32 EmptySlotIndex = InContainer->FindEmptySlot();
+			if (EmptySlotIndex >= 0)
 			{
-				if (ContainerContents[Index].ItemRowName == Local_ItemToAdd)
-				{
-					Local_bIsNewItem = false;
-					Local_CurrentAmountInContainer = ContainerContents[Index].ItemAmount;
-					break;
-				}
-			}
-
-			FInventoryContents NewItem;
-			NewItem.ItemRowName = Local_ItemToAdd;
-
-			// TODO: ContainerContents를 직접 참조하고있기에 나중에 바꿔야함.
-			if (Local_bIsNewItem)
-			{
-				NewItem.ItemAmount = Local_AmountToAdd;
-				InContainer->ContainerContents.Add(NewItem);
+				InContainer->ContainerContents[EmptySlotIndex].ItemRowName = ItemToAdd.ItemRowName;
+				InContainer->ContainerContents[EmptySlotIndex].ItemAmount = ItemToAdd.ItemAmount;
 			}
 			else
 			{
-				NewItem.ItemAmount = Local_AmountToAdd + Local_CurrentAmountInContainer;
-				InContainer->ContainerContents[Index] = NewItem;
+				UE_LOG(LogTemp, Warning, TEXT("Container is full. Can't add new item."));
+				return;
 			}
 		}
-		All_SavedContainerActors[Local_ContainerWorldIndex] = InContainer;
-		All_SavedContainerActorsInfo[Local_ContainerWorldIndex].ContainerContents = InContainer->ContainerContents;
-		All_SavedContainerActorsInfo[Local_ContainerWorldIndex].WorldTransform = InContainer->GetActorTransform();
-		All_SavedContainerActorsInfo[Local_ContainerWorldIndex].ContainerRowName = InContainer->GetContainerRowName();
-		InventoryGameInstance->Update_SavedContainerActors(All_SavedContainerActorsInfo);
-		InContainer->ContainerContentsChanged();
-	}	
+	}
+	UpdateContainerInfo(InContainer, ContainerIndex);
+}
+
+void AInventoryGameModeBase::UpdateContainerInfo(AContainer* InContainer, int32 ContainerIndex)
+{
+	All_SavedContainerActors[ContainerIndex] = InContainer;
+	All_SavedContainerActorsInfo[ContainerIndex].ContainerContents = InContainer->ContainerContents;
+	All_SavedContainerActorsInfo[ContainerIndex].WorldTransform = InContainer->GetActorTransform();
+	All_SavedContainerActorsInfo[ContainerIndex].ContainerRowName = InContainer->GetContainerRowName();
+
+	InventoryGameInstance->Update_SavedContainerActors(All_SavedContainerActorsInfo);
+	InContainer->ContainerContentsChanged();
 }
 
 void AInventoryGameModeBase::Remove_ItemFromContainer(const TArray<FInventoryContents>& InContents, AContainer* InContainer)
