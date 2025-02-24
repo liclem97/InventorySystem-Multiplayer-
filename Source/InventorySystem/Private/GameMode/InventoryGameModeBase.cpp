@@ -225,6 +225,23 @@ void AInventoryGameModeBase::Remove_ItemFromContainer(const TArray<FInventoryCon
 	UpdateContainerInfo(InContainer, ContainerIndex);
 }
 
+void AInventoryGameModeBase::Remove_DraggedItemFromContainer(const TArray<FInventoryContents>& InContents, AContainer* InContainer, bool bDropWorld, int32 InventoryIndex)
+{
+	int32 ContainerIndex = All_SavedContainerActors.Find(InContainer);
+	if (ContainerIndex == INDEX_NONE)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString("ERROR: Container not found in world! - GameMode->Add_ItemToContainer."));
+		return;
+	}
+
+	if (InContainer->ContainerContents[InventoryIndex].ItemAmount > 0 && InContainer->ContainerContents[InventoryIndex].ItemRowName != FName("Empty"))
+	{
+		InContainer->ContainerContents[InventoryIndex].ItemAmount = 0;
+		InContainer->ContainerContents[InventoryIndex].ItemRowName = FName("Empty");
+		UpdateContainerInfo(InContainer, ContainerIndex);
+	}
+}
+
 void AInventoryGameModeBase::Add_SavedPickupActor(APickup* InPickup)
 {	
 	if (!InPickup)

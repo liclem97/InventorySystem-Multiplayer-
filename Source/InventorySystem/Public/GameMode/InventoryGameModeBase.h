@@ -24,6 +24,7 @@ public:
 	void Add_SavedPickupActor(APickup* InPickup);
 	void Add_ItemToContainer(const TArray<FInventoryContents>& InContents, AContainer* InContainer);
 	void Remove_ItemFromContainer(const TArray<FInventoryContents>& InContents, AContainer* InContainer);
+	void Remove_DraggedItemFromContainer(const TArray<FInventoryContents>& InContents, AContainer* InContainer, bool bDropWorld, int32 InventoryIndex);
 
 	/** Getter */
 	FORCEINLINE UDataTable* GetItemDataTable() const { return ItemDataTable; }

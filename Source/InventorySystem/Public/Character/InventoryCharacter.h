@@ -54,9 +54,11 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_RemoveItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld, int32 InventoryIndex);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, Category = "Drag and Drop")
 	void Server_RemoveDraggedItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld, int32 InventoryIndex);
 
+	UFUNCTION(Server, Reliable, Category = "Drag and Drop")
+	void Server_RemoveDraggedItemFromContainer(const TArray<FInventoryContents>& InContents, bool bDropIntoWorld, int32 InventoryIndex);
 	/** End Server */
 
 	/** Client */

@@ -155,6 +155,19 @@ void AInventoryCharacter::Server_RemoveItemFromContainer_Implementation(const TA
 	}
 }
 
+
+void AInventoryCharacter::Server_RemoveDraggedItemFromContainer_Implementation(const TArray<FInventoryContents>& InContents, bool bDropIntoWorld, int32 InventoryIndex)
+{	
+	if (InventoryGameMode && OpenedContainer)
+	{
+		InventoryGameMode->Remove_DraggedItemFromContainer(InContents, OpenedContainer, bDropIntoWorld, InventoryIndex);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Character: GameMode or OpenedContainer is nullptr. -Server_RemoveDraggedItemFromContainer -"));
+	}
+}
+
 void AInventoryCharacter::Server_AddItemToContainer_Implementation(const TArray<FInventoryContents>& InContents)
 {
 	if (InventoryGameMode && OpenedContainer)
@@ -534,5 +547,4 @@ void AInventoryCharacter::PossessedBy(AController* NewController)
 	InventoryGameMode = InventoryGameMode == nullptr ? Cast<AInventoryGameModeBase>(UGameplayStatics::GetGameMode(this)) : InventoryGameMode;
 	InventoryPlayerController = InventoryPlayerController == nullptr ? Cast<AInventoryPlayerController>(NewController) : InventoryPlayerController;
 }
-
 

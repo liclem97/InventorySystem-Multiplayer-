@@ -97,11 +97,10 @@ void UInventorySlot::RemoveDraggedItem()
 	
 	if (bIsWorldItem)
 	{
-		PlayerInventory->GetInventoryCharacter()->Server_RemoveItemFromContainer(ArrayContents);
+		PlayerInventory->GetInventoryCharacter()->Server_RemoveDraggedItemFromContainer(ArrayContents, false, InventoryIndex);
 	}
 	else
 	{
-		//PlayerInventory->GetInventoryCharacter()->Server_RemoveItemFromInventory(ArrayContents, false, InventoryIndex);
 		PlayerInventory->GetInventoryCharacter()->Server_RemoveDraggedItemFromInventory(ArrayContents, false, InventoryIndex);
 	}
 }
