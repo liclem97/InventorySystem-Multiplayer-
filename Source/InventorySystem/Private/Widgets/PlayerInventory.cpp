@@ -8,6 +8,7 @@
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/UniformGridPanel.h"
+#include "DragDrop/DragDrop.h"
 #include "PlayerController/InventoryPlayerController.h"
 #include "Widgets/InventoryGrid.h"
 #include "Widgets/InventorySlot.h"
@@ -40,12 +41,27 @@ void UPlayerInventory::ItemDropped(bool bDroppedInWorldInventory, bool bDroppedI
 	if (bDroppedInWorldInventory)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString("Dropped on World Inventory."));
-		InventoryCharacter->Server_AddItemToContainer(Local_DroppedItems);
+		if (bWasWorldItem) // World -> World.
+		{
+			InventoryCharacter->Server_AddItemToContainer(Local_DroppedItems);
+		}
+		else // Player -> World.
+		{
+
+		}
+
 	}
 	else if (bDroppedInPlayerInventory)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString("Dropped on Player Inventory."));
-		InventoryCharacter->Server_AddItemToInventory(Local_DroppedItems, nullptr, InventoryIndex);
+		if (bWasWorldItem) // World -> Player.
+		{
+
+		}
+		else // Player -> Player.
+		{
+			InventoryCharacter->Server_AddItemToInventory(Local_DroppedItems, nullptr, InventoryIndex);
+		}
 	}
 	else if (!bDroppedInWorldInventory && !bDroppedInPlayerInventory)
 	{
@@ -124,6 +140,23 @@ void UPlayerInventory::OnClicked_Button_TakeItem()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("PlayerInventory: All_InventorySlot_World is empty or InventoryCharacter or OpenedContainer is nullptr."));
+	}
+}
+
+void UPlayerInventory::SlotItemSwap(UDragDrop* DragDrop, int32 InInventoryIndex)
+{
+	if (InventoryCharacter)
+	{
+		All_InventorySlot_Player[DragDrop->GetCurrentIndex()]->SetItemRowName(All_InventorySlot_Player[InInventoryIndex]->GetItemRowName());
+		All_InventorySlot_Player[DragDrop->GetCurrentIndex()]->SetItemAmount(All_InventorySlot_Player[InInventoryIndex]->GetItemAmount());
+		All_InventorySlot_Player[DragDrop->GetCurrentIndex()]->SetIsWorldItem(All_InventorySlot_Player[InInventoryIndex]->GetIsWorldItem());
+
+		All_InventorySlot_Player[InInventoryIndex]->SetItemRowName(All_InventorySlot_Player[DragDrop->GetCurrentIndex()]->GetItemRowName());
+		All_InventorySlot_Player[InInventoryIndex]->SetItemAmount(All_InventorySlot_Player[DragDrop->GetCurrentIndex()]->GetItemAmount());
+		All_InventorySlot_Player[InInventoryIndex]->SetIsWorldItem(All_InventorySlot_Player[DragDrop->GetCurrentIndex()]->GetIsWorldItem());
+
+		InventoryCharacter->SaveItemAndUpdateHUD(nullptr);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Slot Item Swapped from %d to %d"), DragDrop->GetCurrentIndex(), InInventoryIndex));
 	}
 }
 

@@ -20,6 +20,9 @@ class INVENTORYSYSTEM_API UInventorySlot : public UUserWidget
 public:
 	/** Getter*/
 	FORCEINLINE FName GetItemRowName() const { return ItemRowName; }
+	FORCEINLINE int32 GetItemAmount() const { return ItemAmount; }
+	FORCEINLINE int32 GetItemIndex() const { return InventoryIndex; }
+	FORCEINLINE bool GetIsWorldItem() const { return bIsWorldItem; }
 	/** End Getter*/
 
 	/** Setter */

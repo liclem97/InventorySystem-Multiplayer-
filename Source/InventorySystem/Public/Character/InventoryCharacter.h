@@ -30,6 +30,7 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 
 	void AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup, int32 InventoryIndex);
+	void AddDraggedItemToInventory(const TArray<FInventoryContents>& PickupContents, int32 InventoryIndex);
 	void SaveItemAndUpdateHUD(APickup* InPickup);
 
 	int32 FindEmptySlot() const; 
@@ -59,6 +60,12 @@ public:
 
 	UFUNCTION(Server, Reliable, Category = "Drag and Drop")
 	void Server_RemoveDraggedItemFromContainer(const TArray<FInventoryContents>& InContents, bool bDropIntoWorld, int32 InventoryIndex);
+
+	UFUNCTION(Server, Reliable, Category = "Drag and Drop")
+	void Server_AddDraggedItemToInventory(const TArray<FInventoryContents>& PickupContents, int32 InventoryIndex);
+
+	UFUNCTION(Server, Reliable, Category = "Drag and Drop")
+	void Server_AddDraggedItemToContainer(const TArray<FInventoryContents>& PickupContents, AContainer* InContainer);
 	/** End Server */
 
 	/** Client */

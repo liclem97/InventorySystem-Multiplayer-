@@ -379,6 +379,31 @@ void AInventoryCharacter::AddItemToInventory(const TArray<FInventoryContents>& P
 	SaveItemAndUpdateHUD(InPickup);
 }
 
+void AInventoryCharacter::Server_AddDraggedItemToInventory_Implementation(const TArray<FInventoryContents>& PickupContents, int32 InventoryIndex)
+{
+	AddDraggedItemToInventory(PickupContents, InventoryIndex);
+}
+
+void AInventoryCharacter::AddDraggedItemToInventory(const TArray<FInventoryContents>& PickupContents, int32 InventoryIndex)
+{	
+	// 1. 아이템 이름이 같은 경우 수량 추가.
+	if (PlayerInventory[InventoryIndex].ItemRowName == PickupContents[0].ItemRowName)
+	{
+		PlayerInventory[InventoryIndex].ItemAmount += PickupContents[0].ItemAmount;
+	}
+	// 2. 아이템 이름이 다른 경우 아이템 스왑.
+	else if (PlayerInventory[InventoryIndex].ItemRowName != PickupContents[0].ItemRowName)
+	{
+		// Item Swap.
+	}
+	// 3. 아이템 인벤토리가 비어있는 경우 그냥 추가.
+	else if (PlayerInventory[InventoryIndex].ItemRowName == FName("Empty"))
+	{
+		PlayerInventory[InventoryIndex] = PickupContents[0];
+	}
+	SaveItemAndUpdateHUD(nullptr);
+}
+
 void AInventoryCharacter::SaveItemAndUpdateHUD(APickup* InPickup)
 {
 	if (IsValid(InPickup) && InventoryGameMode)
@@ -548,3 +573,6 @@ void AInventoryCharacter::PossessedBy(AController* NewController)
 	InventoryPlayerController = InventoryPlayerController == nullptr ? Cast<AInventoryPlayerController>(NewController) : InventoryPlayerController;
 }
 
+void AInventoryCharacter::Server_AddDraggedItemToContainer_Implementation(const TArray<FInventoryContents>& PickupContents, AContainer* InContainer)
+{
+}

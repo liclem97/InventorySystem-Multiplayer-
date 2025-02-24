@@ -12,6 +12,7 @@ class UInventorySlot;
 class UBorder;
 class UButton;
 class AInventoryCharacter;
+class UDragDrop;
 
 /**
  * 
@@ -45,6 +46,9 @@ protected:
 
 	UFUNCTION()
 	void OnClicked_Button_TakeItem();
+
+	UFUNCTION(BlueprintCallable)
+	void SlotItemSwap(UDragDrop* DragDrop, int32 InInventoryIndex);
 
 private:
 	UPROPERTY(meta = (BindWidget))
