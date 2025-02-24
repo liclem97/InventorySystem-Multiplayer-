@@ -294,6 +294,23 @@ void AInventoryCharacter::RemoveItemFromInventory(const TArray<FInventoryContent
 	InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
 }
 
+void AInventoryCharacter::RemoveDraggedItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld, int32 InventoryIndex)
+{
+	if (PlayerInventory[InventoryIndex].ItemAmount > 0 && PlayerInventory[InventoryIndex].ItemRowName != FName("Empty"))
+	{
+		PlayerInventory[InventoryIndex].ItemAmount = 0;
+		PlayerInventory[InventoryIndex].ItemRowName = FName("Empty");
+
+		SaveCurrentInventory();
+		InventoryPlayerController->HUD_UpdateInventoryGrid(PlayerInventory, true, false);
+	}	
+}
+
+void AInventoryCharacter::Server_RemoveDraggedItemFromInventory_Implementation(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld, int32 InventoryIndex)
+{
+	RemoveDraggedItemFromInventory(ItemInfo, bDropIntoWorld, InventoryIndex);
+}
+
 void AInventoryCharacter::SaveCurrentInventory()
 {
 	if (!IsValid(InventoryPlayerController))
@@ -517,4 +534,5 @@ void AInventoryCharacter::PossessedBy(AController* NewController)
 	InventoryGameMode = InventoryGameMode == nullptr ? Cast<AInventoryGameModeBase>(UGameplayStatics::GetGameMode(this)) : InventoryGameMode;
 	InventoryPlayerController = InventoryPlayerController == nullptr ? Cast<AInventoryPlayerController>(NewController) : InventoryPlayerController;
 }
+
 

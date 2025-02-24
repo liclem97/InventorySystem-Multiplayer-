@@ -82,7 +82,7 @@ void UInventorySlot::Update_ItemAmount(int32 InItemAmount)
 
 void UInventorySlot::RemoveDraggedItem()
 {	
-	if (!PlayerInventory && PlayerInventory->GetInventoryCharacter())
+	if (!PlayerInventory || !PlayerInventory->GetInventoryCharacter())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("InventorySlot: PlayerInventory or InventoryCharacter is not valid."));
 		return;
@@ -93,15 +93,15 @@ void UInventorySlot::RemoveDraggedItem()
 	NewContents.ItemAmount = ItemAmount;
 
 	TArray<FInventoryContents> ArrayContents;
-	ArrayContents.Empty();
 	ArrayContents.Add(NewContents);
-
+	
 	if (bIsWorldItem)
 	{
 		PlayerInventory->GetInventoryCharacter()->Server_RemoveItemFromContainer(ArrayContents);
 	}
 	else
 	{
-		PlayerInventory->GetInventoryCharacter()->Server_RemoveItemFromInventory(ArrayContents, false, InventoryIndex);
+		//PlayerInventory->GetInventoryCharacter()->Server_RemoveItemFromInventory(ArrayContents, false, InventoryIndex);
+		PlayerInventory->GetInventoryCharacter()->Server_RemoveDraggedItemFromInventory(ArrayContents, false, InventoryIndex);
 	}
 }

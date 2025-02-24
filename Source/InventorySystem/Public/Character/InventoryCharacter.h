@@ -53,6 +53,10 @@ public:
 
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_RemoveItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld, int32 InventoryIndex);
+
+	UFUNCTION(Server, Reliable)
+	void Server_RemoveDraggedItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld, int32 InventoryIndex);
+
 	/** End Server */
 
 	/** Client */
@@ -77,6 +81,7 @@ protected:
 
 	void SetupInputMapping();
 	void RemoveItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld, int32 InventoryIndex);
+	void RemoveDraggedItemFromInventory(const TArray<FInventoryContents>& ItemInfo, bool bDropIntoWorld, int32 InventoryIndex);
 	void SaveCurrentInventory();
 
 	/** Player Input*/
