@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "DragDrop/DragDrop.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -22,6 +23,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "PlayerController/InventoryPlayerController.h"
+#include "utility"
 #include "Widgets/PlayerInventory.h"
 
 AInventoryCharacter::AInventoryCharacter()
@@ -140,6 +142,24 @@ void AInventoryCharacter::OnMeshOverlapEnd(UPrimitiveComponent* OverlappedCompon
 		{
 			LeaveContainerTrigger();
 		}
+	}
+}
+
+void AInventoryCharacter::Server_ItemSwap_Implementation(UDragDrop* InDragDrop, int32 InInventoryIndex)
+{
+	InventoryItemSwap(InDragDrop, InInventoryIndex);
+}
+
+void AInventoryCharacter::InventoryItemSwap(UDragDrop* InDragDrop, int32 InIndex)
+{	
+	if (PlayerInventory.IsValidIndex(InDragDrop->GetCurrentIndex()) && PlayerInventory.IsValidIndex(InIndex))
+	{	
+		PlayerInventory[InDragDrop->GetCurrentIndex()] = PlayerInventory[InIndex];
+		PlayerInventory[InIndex].ItemRowName = InDragDrop->GetItemRowName();
+		PlayerInventory[InIndex].ItemAmount = InDragDrop->GetItemAmount();
+
+		SaveItemAndUpdateHUD(nullptr);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Slot Item Swapped from %d to %d"), InDragDrop->GetCurrentIndex(), InIndex));
 	}
 }
 
@@ -576,3 +596,5 @@ void AInventoryCharacter::PossessedBy(AController* NewController)
 void AInventoryCharacter::Server_AddDraggedItemToContainer_Implementation(const TArray<FInventoryContents>& PickupContents, AContainer* InContainer)
 {
 }
+
+

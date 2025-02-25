@@ -33,18 +33,8 @@ public:
 	void SetInventoryIndex(int32 InIndex) { InventoryIndex = InIndex; }
 	/** End Setter*/
 
-protected:
-	virtual void NativeConstruct() override;
-	void Update_ItemAmount(int32 InItemAmount);
-
-	UFUNCTION(BlueprintCallable)
-	void RemoveDraggedItem();
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"))
 	FName ItemRowName;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"))
-	UPlayerInventory* PlayerInventory;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"))
 	int32 ItemAmount;
@@ -52,11 +42,21 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"))
 	bool bIsWorldItem;
 
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UBorder* Border_Background;
-
 	UPROPERTY(BlueprintReadOnly)
 	int32 InventoryIndex;
+
+protected:
+	virtual void NativeConstruct() override;
+	void Update_ItemAmount(int32 InItemAmount);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveDraggedItem();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ExposeOnSpawn = "true"))
+	UPlayerInventory* PlayerInventory;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UBorder* Border_Background;
 
 private:
 	UPROPERTY(meta = (BindWidget))

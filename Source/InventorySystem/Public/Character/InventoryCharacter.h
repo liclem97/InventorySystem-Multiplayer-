@@ -17,6 +17,7 @@ class APickup;
 class AInventoryGameModeBase;
 class AInventoryPlayerController;
 class AContainer;
+class UDragDrop;
 
 UCLASS()
 class INVENTORYSYSTEM_API AInventoryCharacter : public ACharacter
@@ -49,7 +50,7 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_RemoveItemFromContainer(const TArray<FInventoryContents>& InContents);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup, int32 InventoryIndex);
 
 	UFUNCTION(Server, Reliable, BlueprintCallable)
@@ -66,6 +67,9 @@ public:
 
 	UFUNCTION(Server, Reliable, Category = "Drag and Drop")
 	void Server_AddDraggedItemToContainer(const TArray<FInventoryContents>& PickupContents, AContainer* InContainer);
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Drag and Drop")
+	void Server_ItemSwap(UDragDrop* InDragDrop, int32 InInventoryIndex);
 	/** End Server */
 
 	/** Client */
@@ -127,6 +131,9 @@ protected:
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex);
+
+	UFUNCTION(BlueprintCallable)
+	void InventoryItemSwap(UDragDrop* InDragDrop, int32 InIndex);
 
 	/** Server */
 	UFUNCTION(Server, Reliable)

@@ -143,23 +143,6 @@ void UPlayerInventory::OnClicked_Button_TakeItem()
 	}
 }
 
-void UPlayerInventory::SlotItemSwap(UDragDrop* DragDrop, int32 InInventoryIndex)
-{
-	if (InventoryCharacter)
-	{
-		All_InventorySlot_Player[DragDrop->GetCurrentIndex()]->SetItemRowName(All_InventorySlot_Player[InInventoryIndex]->GetItemRowName());
-		All_InventorySlot_Player[DragDrop->GetCurrentIndex()]->SetItemAmount(All_InventorySlot_Player[InInventoryIndex]->GetItemAmount());
-		All_InventorySlot_Player[DragDrop->GetCurrentIndex()]->SetIsWorldItem(All_InventorySlot_Player[InInventoryIndex]->GetIsWorldItem());
-
-		All_InventorySlot_Player[InInventoryIndex]->SetItemRowName(All_InventorySlot_Player[DragDrop->GetCurrentIndex()]->GetItemRowName());
-		All_InventorySlot_Player[InInventoryIndex]->SetItemAmount(All_InventorySlot_Player[DragDrop->GetCurrentIndex()]->GetItemAmount());
-		All_InventorySlot_Player[InInventoryIndex]->SetIsWorldItem(All_InventorySlot_Player[DragDrop->GetCurrentIndex()]->GetIsWorldItem());
-
-		InventoryCharacter->SaveItemAndUpdateHUD(nullptr);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Slot Item Swapped from %d to %d"), DragDrop->GetCurrentIndex(), InInventoryIndex));
-	}
-}
-
 void UPlayerInventory::Setup_InventoryGrid(const TArray<FInventoryContents>& InContents, bool bIsPlayerInventory, bool bIsWorldInventory)
 {	
 	TArray<UInventorySlot*> Local_InventorySlotWidgets = TArray<UInventorySlot*>();;
