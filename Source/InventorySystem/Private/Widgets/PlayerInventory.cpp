@@ -43,7 +43,7 @@ void UPlayerInventory::ItemDropped(bool bDroppedInWorldInventory, bool bDroppedI
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString("Dropped on World Inventory."));
 		if (bWasWorldItem) // World -> World.
 		{
-			InventoryCharacter->Server_AddItemToContainer(Local_DroppedItems);
+		
 		}
 		else // Player -> World.
 		{
@@ -60,7 +60,7 @@ void UPlayerInventory::ItemDropped(bool bDroppedInWorldInventory, bool bDroppedI
 		}
 		else // Player -> Player.
 		{
-			InventoryCharacter->Server_AddItemToInventory(Local_DroppedItems, nullptr, InventoryIndex);
+			
 		}
 	}
 	else if (!bDroppedInWorldInventory && !bDroppedInPlayerInventory)
@@ -68,11 +68,11 @@ void UPlayerInventory::ItemDropped(bool bDroppedInWorldInventory, bool bDroppedI
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString("Dropped into World."));
 		if (bWasWorldItem)
 		{
-			InventoryCharacter->Server_AddItemToContainer(Local_DroppedItems);
+			//InventoryCharacter->Server_AddItemToContainer(Local_DroppedItems);
 		}
 		else
 		{
-			InventoryCharacter->Server_AddItemToInventory(Local_DroppedItems, nullptr, InventoryIndex);
+			//InventoryCharacter->Server_AddItemToInventory(Local_DroppedItems, nullptr, InventoryIndex);
 		}
 	}
 }
@@ -132,10 +132,8 @@ void UPlayerInventory::OnClicked_Button_TakeItem()
 		TakeItem.ItemAmount = 1;
 		TakeArray.Add(TakeItem);
 
-		int32 TakeItemIndex = InventoryCharacter->FindEmptySlot();
-
 		InventoryCharacter->Server_RemoveItemFromContainer(TakeArray);
-		InventoryCharacter->Server_AddItemToInventory(TakeArray, nullptr, TakeItemIndex);
+		InventoryCharacter->Server_AddItemToInventory(TakeArray, nullptr, -1);
 	}
 	else
 	{

@@ -78,12 +78,8 @@ void APickup::OnConstruction(const FTransform& Transform)
 
 void APickup::InteractWithActor_Implementation(AInventoryCharacter* PlayerCharacter)
 {	
-	int32 EmptyIndex = PlayerCharacter->FindEmptySlot();
-	if (EmptyIndex >= 0)
-	{
-		PlayerCharacter->AddItemToInventory(ItemContents, this, EmptyIndex);
-		Destroy();
-	}	
+	PlayerCharacter->AddItemToInventory(ItemContents, this, -1);
+	Destroy();
 }
 
 void APickup::SetItemNameVisibility_Implementation(bool InVisibility)

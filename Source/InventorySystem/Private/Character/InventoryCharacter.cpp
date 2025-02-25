@@ -360,41 +360,36 @@ void AInventoryCharacter::Server_AddItemToInventory_Implementation(const TArray<
 }
 
 void AInventoryCharacter::AddItemToInventory(const TArray<FInventoryContents>& PickupContents, APickup* InPickup, int32 InventoryIndex)
-{	
-	// 현재 아이템을 각 슬롯에 한 개씩 추가하는 상태.
-	UE_LOG(LogTemp, Warning, TEXT("Add to Inventory Index: %d"), InventoryIndex);
-	
+{		
 	if (PickupContents.Num() > 1)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString("Warning: Pickup items can only contain 1 item."));
+		return;
 	}
-
-	// Empty 슬롯이 없으면 같은 아이템의 첫 번째 슬롯을 찾음.
+	
+	bool bAdded = false;
 	if (InventoryIndex < 0)
 	{
 		for (int32 i = 0; i < PlayerInventory.Num(); i++)
 		{
-			if (PlayerInventory[i].ItemRowName == PickupContents[0].ItemRowName)
+			if (PlayerInventory[i].ItemRowName == FName("Empty"))
 			{
-				InventoryIndex = i;
+				PlayerInventory[i] = PickupContents[0];
+				bAdded = true;
 				break;
 			}
-			else
+			else if (PlayerInventory[i].ItemRowName == PickupContents[0].ItemRowName)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Inventory is full, Can't add item to inventory."));
-				return;
+				PlayerInventory[i].ItemAmount += PickupContents[0].ItemAmount;
+				bAdded = true;
+				break;
 			}
 		}
-	}
-
-	// 아이템 이름이 같으면 수량 추가.
-	if (PlayerInventory[InventoryIndex].ItemRowName == PickupContents[0].ItemRowName)
-	{
-		PlayerInventory[InventoryIndex].ItemAmount += PickupContents[0].ItemAmount;
-	}
-	else if (PlayerInventory[InventoryIndex].ItemRowName == FName("Empty"))
-	{	
-		PlayerInventory[InventoryIndex] = PickupContents[0];
+		if (!bAdded)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Inventory is full, Can't add item to inventory."));
+			return;
+		}
 	}
 	SaveItemAndUpdateHUD(InPickup);
 }
